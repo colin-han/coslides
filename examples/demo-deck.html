@@ -1,0 +1,574 @@
+<!DOCTYPE html>
+<!--
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │  coslides · 单文件演示文稿模板                                          │
+  │  用法：只在下方 #deck 内填写 <section class="slide"> 页面。            │
+  │  不要修改 <style> / <script>（仅顶部 :root 配置区可改主色）。          │
+  │  组件用法见同目录 COMPONENTS.md，完整范例见 examples/demo-deck.html。   │
+  └─────────────────────────────────────────────────────────────────────┘
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<!-- ↓ 改这里：deck 标题（浏览器标签 + 分享标题） -->
+<title>coslides · 用 AI 快速生成演示文稿</title>
+<style>
+  :root {
+    /* ═══ coslides 配置区：改这几行就能换主色/风格 ═══ */
+    --accent:   #38e0d0;   /* 主强调色：眉标 / 进度条 / 高亮 / 品牌点 */
+    --accent-2: #4ade80;   /* 次强调色：成功 / 强调 */
+    --bg:       #0b1020;   /* 背景底色 */
+    /* ═══ 以下为派生色 / 字体栈，一般无需改动 ═══ */
+    --bg-2:#0f1629; --panel:#151d33; --panel-2:#1b2540; --line:#283452;
+    --txt:#e6edf7; --txt-dim:#9fb0cc; --txt-faint:#5f6f8f;
+    --cyan:var(--accent); --emerald:var(--accent-2);
+    --amber:#fbbf24; --violet:#a78bfa; --rose:#fb7185; --blue:#60a5fa;
+    --mono:"SF Mono","JetBrains Mono","Fira Code",Menlo,Consolas,monospace;
+    --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+  }
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html,body{height:100%;background:var(--bg);color:var(--txt);font-family:var(--sans);overflow:hidden;-webkit-font-smoothing:antialiased;}
+  body::before{content:"";position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(56,224,208,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(56,224,208,.035) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;}
+  body::after{content:"";position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(96,165,250,.10),transparent 60%);pointer-events:none;}
+  #bg{position:fixed;inset:0;z-index:0;pointer-events:none;}
+  #deck{position:relative;height:100%;width:100%;z-index:1;}
+
+  .slide{position:absolute;inset:0;display:none;flex-direction:column;padding:5vh 6vw 8vh;opacity:0;transition:opacity .35s ease;overflow:hidden;}
+  .slide.active{display:flex;opacity:1;}
+
+  /* ── 文本 ── */
+  .kicker{font-family:var(--mono);font-size:.8rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:.8rem;display:flex;align-items:center;gap:.6rem;}
+  .kicker::before{content:"";width:26px;height:2px;background:var(--accent);display:inline-block;}
+  .kicker .ch{color:var(--txt-faint);}
+  h1{font-size:3.4rem;line-height:1.08;font-weight:750;letter-spacing:-.01em;}
+  h2{font-size:2.1rem;line-height:1.15;font-weight:700;letter-spacing:-.01em;margin-bottom:1.4rem;}
+  h2 .accent,.accent{color:var(--accent);}
+  .sub{color:var(--txt-dim);font-size:1.15rem;line-height:1.6;max-width:62ch;}
+  .lead{font-size:1.25rem;color:var(--txt-dim);line-height:1.7;max-width:72ch;}
+  .lead strong{color:var(--txt);font-weight:650;}
+  .grow{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0;}
+  .hl{color:var(--amber);font-weight:600;}
+  .ref{font-family:var(--mono);font-size:.9em;color:var(--violet);}
+  code{font-family:var(--mono);color:var(--accent);}
+
+  /* ── card 卡片网格 ── */
+  .cards{display:grid;gap:1.1rem;}
+  .cards.c2{grid-template-columns:repeat(2,1fr);}
+  .cards.c3{grid-template-columns:repeat(3,1fr);}
+  .card{background:linear-gradient(160deg,var(--panel),var(--bg-2));border:1px solid var(--line);border-radius:14px;padding:1.3rem 1.45rem;position:relative;overflow:hidden;transition:transform .25s,border-color .25s,box-shadow .25s;}
+  .card:hover{transform:translateY(-4px);border-color:rgba(56,224,208,.5);box-shadow:0 14px 40px -18px rgba(56,224,208,.5);}
+  .card .top{position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent);}
+  .card.b-emerald .top{background:var(--emerald);} .card.b-amber .top{background:var(--amber);}
+  .card.b-violet .top{background:var(--violet);} .card.b-blue .top{background:var(--blue);} .card.b-rose .top{background:var(--rose);}
+  .card .tag{font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;color:var(--txt-faint);text-transform:uppercase;}
+  .card h3{font-size:1.18rem;margin:.35rem 0 .5rem;font-weight:680;}
+  .card p{color:var(--txt-dim);font-size:.95rem;line-height:1.55;}
+  .card .icon{font-family:var(--mono);font-size:1.4rem;color:var(--accent);}
+  .b-emerald .icon{color:var(--emerald);} .b-amber .icon{color:var(--amber);} .b-violet .icon{color:var(--violet);} .b-blue .icon{color:var(--blue);} .b-rose .icon{color:var(--rose);}
+
+  /* ── feat 特性列表 ── */
+  ul.feat{list-style:none;display:flex;flex-direction:column;gap:.8rem;}
+  ul.feat li{display:flex;gap:.9rem;align-items:flex-start;font-size:1.06rem;line-height:1.5;}
+  ul.feat li .mk{color:var(--accent);font-family:var(--mono);font-weight:700;flex-shrink:0;}
+  ul.feat li b{color:var(--txt);} ul.feat li span.dim{color:var(--txt-dim);}
+
+  /* ── note-card 强调框 ── */
+  .note-card{max-width:780px;margin:0 auto;background:linear-gradient(160deg,rgba(74,222,128,.08),var(--bg-2));border:1px solid rgba(74,222,128,.35);border-radius:14px;padding:1.6rem 1.8rem;font-size:1.2rem;line-height:1.7;color:var(--txt-dim);}
+  .note-card strong{color:var(--emerald);}
+
+  /* ── term 终端模拟 ── */
+  .term{font-family:var(--mono);font-size:.92rem;line-height:1.75;background:#070b16;border:1px solid var(--line);border-radius:12px;padding:1.3rem 1.6rem;max-width:880px;width:100%;}
+  .term .bar{display:flex;gap:.5rem;margin-bottom:.9rem;}
+  .term .bar i{width:11px;height:11px;border-radius:50%;display:inline-block;}
+  .term .bar .r{background:#ff5f56;} .term .bar .y{background:#ffbd2e;} .term .bar .g{background:#27c93f;}
+  .term .ln{white-space:pre;color:var(--txt-dim);}
+  .term .ln .ok{color:var(--emerald);} .term .ln .run{color:var(--accent);} .term .ln .dim{color:var(--txt-faint);} .term .ln .warn{color:var(--amber);}
+
+  /* ── tree 目录树 ── */
+  .tree{font-family:var(--mono);font-size:.92rem;line-height:1.8;color:var(--txt-dim);background:#080c18;border:1px solid var(--line);border-radius:12px;padding:1.4rem 1.7rem;max-width:1100px;white-space:pre;overflow-x:auto;}
+  .tree .d{color:var(--accent);} .tree .hl{color:var(--emerald);} .tree .cm{color:var(--txt-faint);} .tree .pl{color:var(--violet);}
+  .tree b{color:var(--txt);font-weight:600;}
+
+  /* ── code 代码块 ── */
+  pre.code{font-family:var(--mono);font-size:.92rem;line-height:1.7;color:var(--txt-dim);background:#080c18;border:1px solid var(--line);border-radius:12px;padding:1.3rem 1.6rem;max-width:1000px;width:100%;white-space:pre;overflow-x:auto;}
+  pre.code .k{color:var(--violet);} pre.code .s{color:var(--emerald);} pre.code .c{color:var(--txt-faint);} pre.code .f{color:var(--accent);}
+
+  /* ── chips ── */
+  .chips{display:flex;flex-wrap:wrap;gap:.5rem;max-width:840px;}
+  .chip{font-family:var(--mono);font-size:.8rem;padding:.35rem .7rem;border-radius:7px;border:1px solid var(--line);color:var(--accent);background:rgba(56,224,208,.05);}
+
+  /* ── pipeline 流程条 ── */
+  .pipe{display:flex;align-items:stretch;justify-content:center;gap:0;width:100%;margin-top:.5rem;flex-wrap:wrap;}
+  .pnode{flex:1;min-width:150px;max-width:210px;border:1px solid var(--line);border-radius:12px;padding:1rem;background:var(--panel);text-align:center;}
+  .pnode .pc{font-family:var(--mono);font-size:.95rem;color:var(--accent);font-weight:600;}
+  .pnode .pd{font-size:.82rem;color:var(--txt-dim);margin-top:.35rem;line-height:1.45;}
+  .psep{display:flex;align-items:center;padding:0 .5rem;color:var(--accent);font-size:1.4rem;}
+
+  /* ── flow 决策流程图 ── */
+  .flow-node{font-family:var(--mono);font-size:1rem;padding:.8rem 1.5rem;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--txt);}
+  .flow-node code{color:var(--accent);}
+  .flow-arr{color:var(--txt-faint);font-family:var(--mono);font-size:.9rem;letter-spacing:.12em;}
+  .flow-decide{text-align:center;padding:.95rem 1.8rem;border:1.5px solid rgba(251,191,36,.5);border-radius:12px;background:rgba(251,191,36,.06);font-size:1.15rem;font-weight:650;color:var(--amber);}
+  .flow-decide .sub2{font-size:.82rem;font-weight:400;color:var(--txt-dim);margin-top:.3rem;}
+  .flow-branch{flex:1;border:1px solid var(--line);border-radius:12px;padding:1rem 1.2rem;background:var(--panel);}
+  .flow-branch .bl{font-family:var(--mono);font-size:.8rem;letter-spacing:.06em;margin-bottom:.35rem;}
+  .flow-branch .bt{font-weight:680;font-size:1.05rem;margin-bottom:.35rem;color:var(--txt);}
+  .flow-branch .bd{font-size:.86rem;color:var(--txt-dim);line-height:1.5;}
+  .flow-branch.warn{border-color:rgba(251,191,36,.45);} .flow-branch.warn .bl{color:var(--amber);}
+  .flow-branch.ok{border-color:rgba(74,222,128,.45);} .flow-branch.ok .bl{color:var(--emerald);}
+  .flow-out{flex:1;text-align:center;font-weight:680;font-size:1.15rem;padding:.9rem;border-radius:12px;border:1.5px solid;}
+  .flow-out.a{color:var(--accent);border-color:var(--accent);background:rgba(56,224,208,.07);}
+  .flow-out.b{color:var(--violet);border-color:var(--violet);background:rgba(167,139,250,.07);}
+
+  /* ── chat 点击揭示气泡 ── */
+  .chat{display:flex;flex-direction:column;gap:1.1rem;max-width:860px;margin:0 auto;width:100%;}
+  .bubble{border-radius:14px;padding:1.1rem 1.3rem;border:1px solid var(--line);}
+  .bubble .who{font-family:var(--mono);font-size:.74rem;letter-spacing:.08em;margin-bottom:.5rem;}
+  .bubble.ai{background:linear-gradient(160deg,var(--panel),var(--bg-2));align-self:flex-start;max-width:86%;}
+  .bubble.ai .who{color:var(--accent);}
+  .bubble.ai .text{font-size:1.08rem;line-height:1.6;color:var(--txt);}
+  .bubble.human{background:rgba(74,222,128,.06);border-color:rgba(74,222,128,.35);align-self:flex-end;max-width:78%;cursor:pointer;position:relative;transition:background .2s;}
+  .bubble.human:hover{background:rgba(74,222,128,.11);}
+  .bubble.human .who{color:var(--emerald);}
+  .bubble.human .answer{font-size:1.05rem;color:var(--txt);display:none;}
+  .bubble.human .placeholder{font-size:.95rem;color:var(--txt-faint);font-style:italic;display:flex;align-items:center;gap:.5rem;}
+  .bubble.human .placeholder::before{content:"▸";color:var(--emerald);}
+  .bubble.human.revealed .answer{display:block;animation:fadein .35s ease;}
+  .bubble.human.revealed .placeholder{display:none;}
+  @keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
+
+  /* ── two-col 两栏 ── */
+  .two-col{display:grid;grid-template-columns:1fr 1fr;gap:1.6rem;}
+
+  .footnote{font-family:var(--mono);font-size:.74rem;color:var(--txt-faint);margin-top:1.2rem;}
+  .nb{white-space:nowrap;}
+  .card p,.lead{line-break:strict;}
+
+  /* ── 页型：chapter 章节分隔 ── */
+  .slide.chapter{justify-content:center;align-items:flex-start;}
+  .chapter .chap-tag{font-family:var(--mono);font-size:.95rem;letter-spacing:.22em;text-transform:uppercase;margin-bottom:1.3rem;display:flex;align-items:center;gap:.7rem;color:var(--accent);}
+  .chapter .chap-tag::before{content:"";width:42px;height:2px;background:currentColor;display:inline-block;}
+  .chapter h1{font-size:5rem;line-height:1.04;font-weight:760;letter-spacing:-.02em;}
+  .chapter .chap-sub{margin-top:1.6rem;font-size:1.4rem;color:var(--txt-dim);line-height:1.6;max-width:62ch;}
+  .chapter .chap-sub strong{font-weight:650;}
+
+  /* ── 页型：title / agenda / closing ── */
+  .title-slide{justify-content:center;align-items:flex-start;}
+  .title-slide h1{font-size:4.4rem;max-width:20ch;}
+  .title-slide .sub{font-size:1.4rem;margin-top:1.4rem;}
+  .title-meta{margin-top:3rem;display:flex;gap:2.5rem;font-family:var(--mono);font-size:.85rem;color:var(--txt-faint);}
+  .title-meta b{color:var(--accent);font-weight:600;}
+  .agenda{display:grid;grid-template-columns:repeat(2,1fr);gap:1rem;max-width:980px;}
+  .ag-item{display:flex;gap:1rem;align-items:center;border:1px solid var(--line);border-radius:12px;padding:1rem 1.3rem;background:var(--panel);transition:transform .2s,border-color .2s;}
+  .ag-item:hover{transform:translateX(5px);border-color:rgba(56,224,208,.5);}
+  .ag-item .n{font-family:var(--mono);font-size:1.5rem;font-weight:700;color:var(--accent);min-width:2ch;}
+  .ag-item .t{font-weight:650;font-size:1.1rem;} .ag-item .d{font-size:.85rem;color:var(--txt-faint);}
+  .closing{justify-content:center;align-items:center;text-align:center;}
+  .closing h1{font-size:3.4rem;max-width:22ch;}
+  .closing .sub{font-size:1.25rem;margin-top:1.3rem;text-align:center;}
+
+  /* ── chrome 底部条 / 进度 / 圆点 ── */
+  #chrome{position:fixed;bottom:0;left:0;right:0;height:54px;display:flex;align-items:center;justify-content:space-between;padding:0 2.2vw;z-index:10;font-family:var(--mono);font-size:.78rem;color:var(--txt-faint);background:linear-gradient(transparent,rgba(8,12,24,.85));}
+  #brand{display:flex;align-items:center;gap:.6rem;} #brand .dot{width:8px;height:8px;border-radius:50%;background:var(--accent);box-shadow:0 0 10px var(--accent);animation:blink 2s infinite;}
+  @keyframes blink{0%,100%{opacity:1;}50%{opacity:.3;}}
+  #chapname{color:var(--txt-dim);}
+  #dots{display:flex;gap:6px;flex-wrap:wrap;max-width:55vw;justify-content:center;align-items:center;}
+  #dots .d{width:7px;height:7px;border-radius:50%;background:var(--line);cursor:pointer;transition:all .2s;}
+  #dots .d.on{background:var(--accent);transform:scale(1.3);}
+  #dots .gap{width:10px;}
+  #counter b{color:var(--txt);}
+  #progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent-2));z-index:11;transition:width .35s ease;}
+  .nav-hint{position:fixed;bottom:64px;right:2.2vw;font-family:var(--mono);font-size:.72rem;color:var(--txt-faint);z-index:10;opacity:.7;}
+  kbd{border:1px solid var(--line);border-radius:4px;padding:.05rem .4rem;color:var(--txt-dim);}
+
+  /* ── reveal 逐项入场 ── */
+  .reveal-item{opacity:0;transform:translate(var(--enter-x,0px),var(--enter-y,20px));filter:blur(2px);transition:opacity .5s cubic-bezier(.2,.7,.2,1),transform .5s cubic-bezier(.2,.7,.2,1),filter .5s ease;}
+  .slide.active .reveal-item.in{opacity:1;transform:none;filter:none;}
+  @media (prefers-reduced-motion:reduce){.reveal-item{transition:none;opacity:1;transform:none;filter:none;}#brand .dot{animation:none;}}
+
+  /* ── overview 缩略概览 (新增) ── */
+  #overview{position:fixed;inset:0;z-index:30;background:rgba(8,12,24,.96);backdrop-filter:blur(6px);display:none;flex-direction:column;padding:4vh 5vw;overflow-y:auto;}
+  #overview.show{display:flex;}
+  #overview .ov-title{font-family:var(--mono);font-size:.85rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:1.6rem;}
+  .ov-chapter{margin-bottom:1.8rem;}
+  .ov-chapter .ov-ch-name{font-family:var(--mono);font-size:.8rem;letter-spacing:.1em;color:var(--txt-faint);margin-bottom:.7rem;text-transform:uppercase;}
+  .ov-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:.8rem;}
+  .ov-cell{border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:.8rem 1rem;cursor:pointer;transition:transform .15s,border-color .15s;min-height:74px;display:flex;flex-direction:column;justify-content:space-between;}
+  .ov-cell:hover{transform:translateY(-3px);border-color:var(--accent);}
+  .ov-cell.cur{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset;}
+  .ov-cell .ov-n{font-family:var(--mono);font-size:.72rem;color:var(--accent);}
+  .ov-cell .ov-t{font-size:.92rem;color:var(--txt);line-height:1.35;font-weight:600;}
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div id="progress"></div>
+
+<!-- ════════════════════════════════════════════════════════════════════
+     ↓↓↓ 只编辑这个 #deck 区域 ↓↓↓
+     · 每页一个 <section class="slide">；首页加 active。
+     · 章节用 data-chapter="N"，章首页（chapter 页）再加 data-chapter-title="…"。
+     · 封面 / 议程 / 收尾不属于任何章，不写 data-chapter。
+     · 需要逐项入场的元素加 class="reveal-item"。
+     ════════════════════════════════════════════════════════════════════ -->
+<div id="deck">
+
+  <!-- 封面 -->
+  <section class="slide title-slide active">
+    <div class="kicker">coslides · 框架演示</div>
+    <h1>用 AI 快速生成<br><span class="accent">演示文稿</span></h1>
+    <div class="sub">一个单文件 JS/CSS 框架——你只写每页内容，框架负责导航、快捷键、背景与统一风格。<br>本 deck 本身就是用 coslides 写的。</div>
+    <div class="title-meta">
+      <div>范围 · <b>组件 / 导航 / 工作流</b></div>
+      <div>提示 · <b>按 O 看概览，1-3 跳章</b></div>
+    </div>
+  </section>
+
+  <!-- 议程 -->
+  <section class="slide">
+    <div class="kicker">本场议程</div>
+    <h2>三个部分，<span class="accent">从是什么到怎么用</span></h2>
+    <div class="grow">
+      <div class="agenda">
+        <div class="ag-item reveal-item"><div class="n">1</div><div><div class="t">这是什么</div><div class="d">框架定位与交付物</div></div></div>
+        <div class="ag-item reveal-item"><div class="n">2</div><div><div class="t">组件长什么样</div><div class="d">卡片 / 终端 / 流程 / 问答</div></div></div>
+        <div class="ag-item reveal-item"><div class="n">3</div><div><div class="t">AI 怎么用它</div><div class="d">大纲先行、逐章填充</div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 第 1 章 ══ -->
+  <section class="slide chapter" data-chapter="1" data-chapter-title="这是什么">
+    <div class="chap-tag">PART · 01</div>
+    <h1>这是什么</h1>
+    <div class="chap-sub">一个<strong>单文件自包含</strong>的演示框架——复制模板、填内容、双击打开。</div>
+  </section>
+
+  <section class="slide" data-chapter="1">
+    <div class="kicker"><span class="ch">01 ·</span> 定位</div>
+    <h2>你只管<span class="accent">内容</span>，其余<span class="accent">框架包办</span></h2>
+    <div class="grow">
+      <div class="cards c3">
+        <div class="card reveal-item"><div class="top"></div><div class="icon">◰</div><div class="tag">视觉系统</div><h3>暗色科技风</h3><p>网格背景、径向光晕、Canvas 粒子、统一调色板，改一个变量就换主色。</p></div>
+        <div class="card b-violet reveal-item"><div class="top"></div><div class="icon">⌘</div><div class="tag">导航系统</div><h3>开箱即用</h3><p>键盘 / 点击 / 触摸翻页、章节跳转、缩略概览、进度条、深链 hash。</p></div>
+        <div class="card b-emerald reveal-item"><div class="top"></div><div class="icon">▤</div><div class="tag">组件库</div><h3>12 类积木</h3><p>卡片、列表、终端、目录树、流程图、问答气泡……拼出一页只需几行 HTML。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-chapter="1">
+    <div class="kicker"><span class="ch">01 ·</span> 交付物</div>
+    <h2>四个文件，<span class="accent">职责清晰</span></h2>
+    <div class="grow">
+      <div class="tree reveal-item"><span class="b">coslides/</span>
+├── <span class="hl">coslides-template.html</span>   <span class="cm"># ① 单文件模板：复制它，填 #deck</span>
+├── COMPONENTS.md           <span class="cm"># ② 组件手册：每个组件的片段 + 何时用</span>
+├── <span class="d">examples/</span>
+│   └── demo-deck.html      <span class="cm"># ③ 本范例：照着学结构</span>
+└── <span class="d">skill/</span>
+    └── SKILL.md            <span class="cm"># ④ skill：引导 AI 大纲先行→逐章填充</span></div>
+      <p class="lead reveal-item" style="margin-top:1.4rem;">产物始终是<strong>一个</strong>自包含 HTML——无依赖、无构建，发给谁都能直接打开。</p>
+    </div>
+  </section>
+
+  <!-- ══ 第 2 章 ══ -->
+  <section class="slide chapter" data-chapter="2" data-chapter-title="组件长什么样">
+    <div class="chap-tag" style="color:var(--violet)">PART · 02</div>
+    <h1 style="color:var(--violet)">组件长什么样</h1>
+    <div class="chap-sub">挑几个常用组件现场看效果——<strong style="color:var(--violet)">这一章每页都是真组件</strong>。</div>
+  </section>
+
+  <section class="slide" data-chapter="2">
+    <div class="kicker"><span class="ch">02 ·</span> term · 终端模拟</div>
+    <h2>演示命令行，<span class="accent">像真终端一样</span></h2>
+    <div class="grow two-col">
+      <div class="term reveal-item">
+        <div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i></div>
+        <div class="ln"><span class="dim">$</span> cp coslides-template.html my-talk.html</div>
+        <div class="ln"><span class="dim">$</span> open my-talk.html</div>
+        <div class="ln"><span class="ok">✓</span> 导航就绪</div>
+        <div class="ln"><span class="ok">✓</span> 快捷键就绪</div>
+        <div class="ln"><span class="run">▶</span> 开始填内容 <span class="dim">…</span></div>
+      </div>
+      <div>
+        <ul class="feat">
+          <li class="reveal-item"><span class="mk">▸</span><span><b>零安装</b> <span class="dim">— 没有 npm、没有构建</span></span></li>
+          <li class="reveal-item"><span class="mk">▸</span><span><b>零依赖</b> <span class="dim">— 纯静态单文件</span></span></li>
+          <li class="reveal-item"><span class="mk">▸</span><span><b>可离线</b> <span class="dim">— 断网也能放</span></span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-chapter="2">
+    <div class="kicker"><span class="ch">02 ·</span> pipeline · 流程条</div>
+    <h2>线性步骤，<span class="accent">一目了然</span></h2>
+    <div class="grow">
+      <div class="pipe">
+        <div class="pnode reveal-item"><div class="pc">① 复制模板</div><div class="pd">得到空白 deck</div></div>
+        <div class="psep reveal-item">→</div>
+        <div class="pnode reveal-item"><div class="pc">② 列大纲</div><div class="pd">章 / 节结构</div></div>
+        <div class="psep reveal-item">→</div>
+        <div class="pnode reveal-item"><div class="pc">③ 填内容</div><div class="pd">选组件拼页</div></div>
+        <div class="psep reveal-item">→</div>
+        <div class="pnode reveal-item"><div class="pc">④ 打开</div><div class="pd">双击即放映</div></div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-chapter="2">
+    <div class="kicker"><span class="ch">02 ·</span> chat · 点击揭示</div>
+    <h2>现场互动，<span class="accent">先抛问题再揭答案</span></h2>
+    <div class="grow" style="justify-content:center;">
+      <div class="chat">
+        <div class="bubble ai reveal-item">
+          <div class="who">🤖 提问</div>
+          <div class="text">想换个主色，比如把青色换成<span class="hl">橙色</span>，要改几处？</div>
+        </div>
+        <div class="bubble human reveal-item" onclick="this.classList.toggle('revealed')">
+          <div class="who">🧑 回答</div>
+          <div class="answer">一处——顶部 <code>--accent</code> 变量。整套配色自动跟随。</div>
+          <div class="placeholder">点击揭示回答…</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-chapter="2">
+    <div class="kicker"><span class="ch">02 ·</span> note-card · 强调框</div>
+    <div class="grow" style="justify-content:center;">
+      <div class="note-card reveal-item">
+        💡 还有更多组件没在这里展示：<strong>flow 决策图</strong>、<strong>code 代码块</strong>、<strong>chips 标签</strong>、<strong>card 多色调</strong>、<strong>two-col 两栏</strong>……<br><br>
+        全部片段见 <code>COMPONENTS.md</code>，复制即用。
+      </div>
+    </div>
+  </section>
+
+  <!-- ══ 第 3 章 ══ -->
+  <section class="slide chapter" data-chapter="3" data-chapter-title="AI 怎么用它">
+    <div class="chap-tag" style="color:var(--emerald)">PART · 03</div>
+    <h1 style="color:var(--emerald)">AI 怎么用它</h1>
+    <div class="chap-sub">配套 skill 引导：<strong style="color:var(--emerald)">大纲先行、逐章填充、自检产出</strong>。</div>
+  </section>
+
+  <section class="slide" data-chapter="3">
+    <div class="kicker"><span class="ch">03 ·</span> 工作流</div>
+    <h2>从一句话选题<span class="accent">到一份 deck</span></h2>
+    <div class="grow">
+      <ul class="feat">
+        <li class="reveal-item"><span class="mk">①</span><span><b>接选题</b> <span class="dim">— 你给主题、要点、受众</span></span></li>
+        <li class="reveal-item"><span class="mk">②</span><span><b>列大纲</b> <span class="dim">— AI 产出 章→节 结构 + 每页拟用组件，停下来给你确认</span></span></li>
+        <li class="reveal-item"><span class="mk">③</span><span><b>逐章填充</b> <span class="dim">— 复制模板，按章写 section，选组件填内容</span></span></li>
+        <li class="reveal-item"><span class="mk">④</span><span><b>自检</b> <span class="dim">— 样式未被改动、章节连续、无占位符、首页有 active</span></span></li>
+        <li class="reveal-item"><span class="mk">⑤</span><span><b>产出</b> <span class="dim">— 一个单文件 HTML，直接放映或分享</span></span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 收尾 -->
+  <section class="slide closing">
+    <div class="kicker" style="justify-content:center;">小结</div>
+    <h1>内容你来写，<br><span class="accent">体验框架包办</span></h1>
+    <div class="sub">复制模板 · 填 #deck · 双击打开。<br>想做下一份？对 AI 说"用 coslides 做一份关于 X 的演示"。</div>
+  </section>
+
+</div>
+<!-- ↑↑↑ 只编辑上面的 #deck 区域 ↑↑↑ -->
+
+<div class="nav-hint">点击 / <kbd>→</kbd> 下一页 · <kbd>←</kbd> 上一页 · <kbd>1-9</kbd> 跳章 · <kbd>O</kbd> 概览 · <kbd>F</kbd> 全屏</div>
+<div id="chrome">
+  <!-- 改这里：品牌名 -->
+  <div id="brand"><span class="dot"></span> <span id="brandname">coslides · 框架演示</span> <span id="chapname"></span></div>
+  <div id="dots"></div>
+  <div id="counter"><b id="cur">1</b> / <span id="total">1</span></div>
+</div>
+<div id="overview"><div class="ov-title">概览 · 点击任意页跳转 · Esc 关闭</div><div id="ov-body"></div></div>
+
+<script>
+  const slides = Array.from(document.querySelectorAll('.slide'));
+  const dotsWrap = document.getElementById('dots');
+  const progress = document.getElementById('progress');
+  const curEl = document.getElementById('cur');
+  const totalEl = document.getElementById('total');
+  const chapEl = document.getElementById('chapname');
+  const overview = document.getElementById('overview');
+  const ovBody = document.getElementById('ov-body');
+  const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
+  let idx = 0;
+  totalEl.textContent = slides.length;
+
+  // ── 章节索引：按 data-chapter 分组 ──
+  // chapters: [{num, title, start}] ；chapterStarts 用于数字键跳章。
+  const chapters = [];
+  slides.forEach((s, i) => {
+    const c = s.dataset.chapter;
+    if (!c) return;
+    if (!chapters.find(x => x.num === c)) {
+      chapters.push({ num: c, title: s.dataset.chapterTitle || ('第 ' + c + ' 章'), start: i });
+    }
+  });
+
+  // ── 底部圆点：按章分组（章与章之间插入间隙）──
+  const dots = [];
+  let prevChapter = slides[0] ? slides[0].dataset.chapter : undefined;
+  slides.forEach((s, i) => {
+    if (i > 0 && s.dataset.chapter !== prevChapter) {
+      const gap = document.createElement('span');
+      gap.className = 'gap';
+      dotsWrap.appendChild(gap);
+    }
+    prevChapter = s.dataset.chapter;
+    const d = document.createElement('div');
+    d.className = 'd' + (i === 0 ? ' on' : '');
+    d.addEventListener('click', () => go(i));
+    dotsWrap.appendChild(d);
+    dots.push(d);
+  });
+
+  // ── 概览缩略网格：按章分区 ──
+  function slideTitle(s) {
+    const el = s.querySelector('h1, h2, .chap-tag, .kicker');
+    return el ? el.textContent.trim().replace(/\s+/g, ' ').slice(0, 48) : '(无标题)';
+  }
+  function buildOverview() {
+    ovBody.innerHTML = '';
+    let group = null, groupChapter = '__none__';
+    slides.forEach((s, i) => {
+      const ch = s.dataset.chapter || '';
+      if (ch !== groupChapter) {
+        groupChapter = ch;
+        group = document.createElement('div');
+        group.className = 'ov-chapter';
+        const name = document.createElement('div');
+        name.className = 'ov-ch-name';
+        const meta = chapters.find(x => x.num === ch);
+        name.textContent = ch ? (meta ? meta.title : ('第 ' + ch + ' 章')) : '— 前言 / 尾声 —';
+        group.appendChild(name);
+        const grid = document.createElement('div');
+        grid.className = 'ov-grid';
+        group.appendChild(grid);
+        ovBody.appendChild(group);
+      }
+      const grid = group.querySelector('.ov-grid');
+      const cell = document.createElement('div');
+      cell.className = 'ov-cell' + (i === idx ? ' cur' : '');
+      cell.innerHTML = '<div class="ov-n">' + (i + 1) + '</div><div class="ov-t">' + slideTitle(s) + '</div>';
+      cell.addEventListener('click', () => { closeOverview(); go(i); });
+      grid.appendChild(cell);
+    });
+  }
+  function openOverview() { buildOverview(); overview.classList.add('show'); }
+  function closeOverview() { overview.classList.remove('show'); }
+  function toggleOverview() { overview.classList.contains('show') ? closeOverview() : openOverview(); }
+
+  // ── reveal 入场 ──
+  const REVEAL_SEL = '.reveal-item';
+  let timers = [];
+  function clearT() { timers.forEach(clearTimeout); timers = []; }
+  function runReveal(slide, dir) {
+    if (dir > 0) { slide.style.setProperty('--enter-x', '-36px'); slide.style.setProperty('--enter-y', '0px'); }
+    else if (dir < 0) { slide.style.setProperty('--enter-x', '36px'); slide.style.setProperty('--enter-y', '0px'); }
+    else { slide.style.setProperty('--enter-x', '0px'); slide.style.setProperty('--enter-y', '20px'); }
+    const items = Array.from(slide.querySelectorAll(REVEAL_SEL));
+    items.forEach(el => el.classList.remove('in'));
+    if (reduceMotion) { items.forEach(el => el.classList.add('in')); return; }
+    const step = items.length > 12 ? 50 : 85;
+    items.forEach((el, i) => timers.push(setTimeout(() => el.classList.add('in'), 90 + i * step)));
+  }
+
+  // ── 当前章名 ──
+  function updateChapName() {
+    const ch = slides[idx].dataset.chapter;
+    const meta = ch && chapters.find(x => x.num === ch);
+    chapEl.textContent = meta ? ('· ' + meta.title) : '';
+  }
+
+  let suppressHash = false;
+  function go(n) {
+    const from = idx;
+    idx = Math.max(0, Math.min(slides.length - 1, n));
+    const dir = idx === from ? 0 : (idx > from ? 1 : -1);
+    clearT();
+    slides.forEach((s, i) => s.classList.toggle('active', i === idx));
+    dots.forEach((d, i) => d.classList.toggle('on', i === idx));
+    curEl.textContent = idx + 1;
+    progress.style.width = ((idx + 1) / slides.length * 100) + '%';
+    updateChapName();
+    runReveal(slides[idx], dir);
+    if (dir !== 0 && window.__kickBg) window.__kickBg(dir);
+    const want = 'p' + (idx + 1);
+    if (location.hash.slice(1) !== want) { suppressHash = true; location.hash = want; }
+  }
+  function next() { go(idx + 1); }
+  function prev() { go(idx - 1); }
+  function gotoChapter(n) { if (chapters[n]) go(chapters[n].start); }
+
+  function applyHash() {
+    if (suppressHash) { suppressHash = false; return; }
+    const m = /^#p(\d+)$/.exec(location.hash);
+    go(m ? parseInt(m[1], 10) - 1 : 0);
+  }
+  window.addEventListener('hashchange', applyHash);
+
+  document.addEventListener('keydown', (e) => {
+    if (overview.classList.contains('show')) {
+      if (e.key === 'Escape' || e.key === 'o' || e.key === 'O') { e.preventDefault(); closeOverview(); }
+      return;
+    }
+    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); next(); }
+    else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prev(); }
+    else if (e.key === 'Home') go(0);
+    else if (e.key === 'End') go(slides.length - 1);
+    else if (e.key === 'Escape' || e.key === 'o' || e.key === 'O') { e.preventDefault(); toggleOverview(); }
+    else if (e.key >= '1' && e.key <= '9') { e.preventDefault(); gotoChapter(parseInt(e.key, 10) - 1); }
+    else if (e.key === 'f' || e.key === 'F') { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
+  });
+
+  document.getElementById('deck').addEventListener('click', (e) => {
+    if (e.target.closest('.bubble.human')) return;   // 揭示答案，不翻页
+    if (e.target.closest('a')) return;               // 让链接正常打开
+    if (e.clientY > window.innerHeight - 70) return; // 底部 chrome 区
+    next();
+  });
+  let tx = 0;
+  document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
+  document.addEventListener('touchend', e => { const dx = e.changedTouches[0].clientX - tx; if (dx < -50) next(); else if (dx > 50) prev(); }, { passive: true });
+
+  // ── 粒子背景（翻页方向性 whoosh）──
+  (function () {
+    if (reduceMotion) { window.__kickBg = null; return; }
+    const canvas = document.getElementById('bg'), ctx = canvas.getContext('2d');
+    let w, h, pts, raf, running = true; const COUNT = 52, LINK = 150;
+    let boost = 0, dir = 0;
+    window.__kickBg = (d) => {
+      dir = d; boost = 1;
+      for (const p of pts) { p.vx += dir * (0.7 + Math.random() * 0.9) * devicePixelRatio; p.vy += (Math.random() - .5) * 1.0 * devicePixelRatio; }
+    };
+    function resize() { w = canvas.width = innerWidth * devicePixelRatio; h = canvas.height = innerHeight * devicePixelRatio; canvas.style.width = innerWidth + 'px'; canvas.style.height = innerHeight + 'px'; }
+    function init() { pts = Array.from({ length: COUNT }, () => ({ x: Math.random() * w, y: Math.random() * h, vx: (Math.random() - .5) * .22 * devicePixelRatio, vy: (Math.random() - .5) * .22 * devicePixelRatio, r: (Math.random() * 1.5 + .5) * devicePixelRatio })); }
+    function frame() {
+      if (!running) return; ctx.clearRect(0, 0, w, h); const link = LINK * devicePixelRatio;
+      const sweep = dir * boost * 3.2 * devicePixelRatio;
+      for (let i = 0; i < pts.length; i++) {
+        const p = pts[i];
+        p.x += p.vx + sweep; p.y += p.vy;
+        if (p.x < 0) p.x += w; else if (p.x > w) p.x -= w;
+        if (p.y < 0) p.y += h; else if (p.y > h) p.y -= h;
+        p.vx += ((Math.sign(p.vx) || 1) * 0.22 * devicePixelRatio - p.vx) * 0.04;
+        p.vy += ((Math.sign(p.vy) || 1) * 0.22 * devicePixelRatio - p.vy) * 0.04;
+        for (let j = i + 1; j < pts.length; j++) { const q = pts[j], dx = p.x - q.x, dy = p.y - q.y, d = Math.hypot(dx, dy); if (d < link) { ctx.strokeStyle = 'rgba(56,224,208,' + (1 - d / link) * (.15 + boost * .35) + ')'; ctx.lineWidth = devicePixelRatio * (.6 + boost * .5); ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke(); } }
+      }
+      for (const p of pts) { ctx.fillStyle = 'rgba(96,165,250,' + (.5 + boost * .4) + ')'; ctx.beginPath(); ctx.arc(p.x, p.y, p.r * (1 + boost * .6), 0, Math.PI * 2); ctx.fill(); }
+      boost *= 0.90; if (boost < 0.01) boost = 0;
+      raf = requestAnimationFrame(frame);
+    }
+    resize(); init(); frame();
+    addEventListener('resize', () => { resize(); init(); });
+    document.addEventListener('visibilitychange', () => { running = !document.hidden; if (running) frame(); else cancelAnimationFrame(raf); });
+  })();
+
+  applyHash();   // 启动：按 URL #p<N>，否则第 1 页
+</script>
+</body>
+</html>
