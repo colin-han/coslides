@@ -398,10 +398,17 @@
   // 高亮元素 / 进度条 / 高亮圆点都引用 --accent，会整体跟随变色；无章节页回落默认色。
   const rootStyle = document.documentElement.style;
   const defaultAccent = (getComputedStyle(document.documentElement).getPropertyValue('--accent') || '#38e0d0').trim();
+  function hexToRgb(hex) {
+    const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec((hex || '').trim());
+    return m ? [parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16)] : [56, 224, 208];
+  }
+  let accentRGB = hexToRgb(defaultAccent);   // 背景粒子读取它 → 跟随章节主题色
   function applyTheme() {
     const ch = slides[idx].dataset.chapter;
     const meta = ch && chapters.find(x => x.num === ch);
-    rootStyle.setProperty('--accent', (meta && meta.color) || defaultAccent);
+    const color = (meta && meta.color) || defaultAccent;
+    rootStyle.setProperty('--accent', color);
+    accentRGB = hexToRgb(color);
   }
 
   let suppressHash = false;
@@ -462,6 +469,7 @@
     const canvas = document.getElementById('bg'), ctx = canvas.getContext('2d');
     let w, h, pts, raf, running = true; const COUNT = 52, LINK = 150;
     let boost = 0, dir = 0;
+    let curRGB = accentRGB.slice();   // 当前粒子色，每帧平滑趋近 accentRGB
     window.__kickBg = (d) => {
       dir = d; boost = 1;
       for (const p of pts) { p.vx += dir * (0.7 + Math.random() * 0.9) * devicePixelRatio; p.vy += (Math.random() - .5) * 1.0 * devicePixelRatio; }
@@ -471,6 +479,8 @@
     function frame() {
       if (!running) return; ctx.clearRect(0, 0, w, h); const link = LINK * devicePixelRatio;
       const sweep = dir * boost * 3.2 * devicePixelRatio;
+      for (let k = 0; k < 3; k++) curRGB[k] += (accentRGB[k] - curRGB[k]) * 0.08;
+      const cr = curRGB[0] | 0, cg = curRGB[1] | 0, cb = curRGB[2] | 0;
       for (let i = 0; i < pts.length; i++) {
         const p = pts[i];
         p.x += p.vx + sweep; p.y += p.vy;
@@ -478,9 +488,9 @@
         if (p.y < 0) p.y += h; else if (p.y > h) p.y -= h;
         p.vx += ((Math.sign(p.vx) || 1) * 0.22 * devicePixelRatio - p.vx) * 0.04;
         p.vy += ((Math.sign(p.vy) || 1) * 0.22 * devicePixelRatio - p.vy) * 0.04;
-        for (let j = i + 1; j < pts.length; j++) { const q = pts[j], dx = p.x - q.x, dy = p.y - q.y, d = Math.hypot(dx, dy); if (d < link) { ctx.strokeStyle = 'rgba(56,224,208,' + (1 - d / link) * (.15 + boost * .35) + ')'; ctx.lineWidth = devicePixelRatio * (.6 + boost * .5); ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke(); } }
+        for (let j = i + 1; j < pts.length; j++) { const q = pts[j], dx = p.x - q.x, dy = p.y - q.y, d = Math.hypot(dx, dy); if (d < link) { ctx.strokeStyle = 'rgba(' + cr + ',' + cg + ',' + cb + ',' + (1 - d / link) * (.15 + boost * .35) + ')'; ctx.lineWidth = devicePixelRatio * (.6 + boost * .5); ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke(); } }
       }
-      for (const p of pts) { ctx.fillStyle = 'rgba(96,165,250,' + (.5 + boost * .4) + ')'; ctx.beginPath(); ctx.arc(p.x, p.y, p.r * (1 + boost * .6), 0, Math.PI * 2); ctx.fill(); }
+      for (const p of pts) { ctx.fillStyle = 'rgba(' + cr + ',' + cg + ',' + cb + ',' + (.5 + boost * .4) + ')'; ctx.beginPath(); ctx.arc(p.x, p.y, p.r * (1 + boost * .6), 0, Math.PI * 2); ctx.fill(); }
       boost *= 0.90; if (boost < 0.01) boost = 0;
       raf = requestAnimationFrame(frame);
     }
