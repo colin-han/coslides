@@ -178,7 +178,7 @@
   #dots .d.on{background:var(--accent);transform:scale(1.3);}
   #dots .gap{width:10px;}
   #counter b{color:var(--txt);}
-  #progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent-2));z-index:11;transition:width .35s ease;}
+  #progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);z-index:11;transition:width .35s ease,background .35s ease;}
   .nav-hint{position:fixed;bottom:64px;right:2.2vw;font-family:var(--mono);font-size:.72rem;color:var(--txt-faint);z-index:10;opacity:.7;}
   kbd{border:1px solid var(--line);border-radius:4px;padding:.05rem .4rem;color:var(--txt-dim);}
 
@@ -209,6 +209,7 @@
      ↓↓↓ 只编辑这个 #deck 区域 ↓↓↓
      · 每页一个 <section class="slide">；首页加 active。
      · 章节用 data-chapter="N"，章首页（chapter 页）再加 data-chapter-title="…"。
+       可选 data-chapter-color="#rrggbb" 给该章一个主题色（高亮/进度条/圆点随之变色）。
      · 封面 / 议程 / 收尾不属于任何章，不写 data-chapter。
      · 需要逐项入场的元素加 class="reveal-item"。
      ════════════════════════════════════════════════════════════════════ -->
@@ -238,7 +239,7 @@
   </section>
 
   <!-- ── 第 1 章 ── -->
-  <section class="slide chapter" data-chapter="1" data-chapter-title="第一章">
+  <section class="slide chapter" data-chapter="1" data-chapter-title="第一章" data-chapter-color="#38e0d0">
     <div class="chap-tag">PART · 01</div>
     <h1>第一章标题</h1>
     <div class="chap-sub">这一章讲什么的<strong>一句话引子</strong>。</div>
@@ -257,7 +258,7 @@
   </section>
 
   <!-- ── 第 2 章 ── -->
-  <section class="slide chapter" data-chapter="2" data-chapter-title="第二章">
+  <section class="slide chapter" data-chapter="2" data-chapter-title="第二章" data-chapter-color="#a78bfa">
     <div class="chap-tag">PART · 02</div>
     <h1>第二章标题</h1>
     <div class="chap-sub">第二章的<strong>引子</strong>。</div>
@@ -308,13 +309,13 @@
   totalEl.textContent = slides.length;
 
   // ── 章节索引：按 data-chapter 分组 ──
-  // chapters: [{num, title, start}] ；chapterStarts 用于数字键跳章。
+  // chapters: [{num, title, start, color}] ；用于数字键跳章 / 章名 / 章节主题色。
   const chapters = [];
   slides.forEach((s, i) => {
     const c = s.dataset.chapter;
     if (!c) return;
     if (!chapters.find(x => x.num === c)) {
-      chapters.push({ num: c, title: s.dataset.chapterTitle || ('第 ' + c + ' 章'), start: i });
+      chapters.push({ num: c, title: s.dataset.chapterTitle || ('第 ' + c + ' 章'), start: i, color: s.dataset.chapterColor || null });
     }
   });
 
@@ -393,6 +394,16 @@
     chapEl.textContent = meta ? ('· ' + meta.title) : '';
   }
 
+  // ── 章节主题色：进入某章时把该章颜色写入全局 --accent ──
+  // 高亮元素 / 进度条 / 高亮圆点都引用 --accent，会整体跟随变色；无章节页回落默认色。
+  const rootStyle = document.documentElement.style;
+  const defaultAccent = (getComputedStyle(document.documentElement).getPropertyValue('--accent') || '#38e0d0').trim();
+  function applyTheme() {
+    const ch = slides[idx].dataset.chapter;
+    const meta = ch && chapters.find(x => x.num === ch);
+    rootStyle.setProperty('--accent', (meta && meta.color) || defaultAccent);
+  }
+
   let suppressHash = false;
   function go(n) {
     const from = idx;
@@ -404,6 +415,7 @@
     curEl.textContent = idx + 1;
     progress.style.width = ((idx + 1) / slides.length * 100) + '%';
     updateChapName();
+    applyTheme();
     runReveal(slides[idx], dir);
     if (dir !== 0 && window.__kickBg) window.__kickBg(dir);
     const want = 'p' + (idx + 1);

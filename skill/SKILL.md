@@ -52,8 +52,8 @@ skill 同级仓库根目录下：
 3. 需要换主色时改顶部 `:root` 的 `--accent`。
 4. 清空 `#deck` 内的占位示例 section，按大纲逐章写：
    - 封面 / 议程 / 收尾**不写** `data-chapter`。
-   - 每章第一页用 `chapter` 页，带 `data-chapter="N"` + `data-chapter-title="章名"`。
-   - 该章其余页带 `data-chapter="N"`。
+   - 每章第一页用 `chapter` 页，带 `data-chapter="N"` + `data-chapter-title="章名"`；可选 `data-chapter-color="#rrggbb"` 给该章一个主题色（章内高亮、进度条、圆点随之变色）。
+   - 该章其余页带 `data-chapter="N"`（颜色/标题只写在第一页）。
    - 首页（封面）保留 `active` 类，其余页不要 `active`。
    - 需要逐项浮现的元素加 `class="reveal-item"`。
 

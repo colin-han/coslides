@@ -41,13 +41,15 @@
 
 ### 章节分隔 `chapter`（每章第一页）
 ```html
-<section class="slide chapter" data-chapter="1" data-chapter-title="目录结构">
+<section class="slide chapter" data-chapter="1" data-chapter-title="目录结构" data-chapter-color="#38e0d0">
   <div class="chap-tag">PART · 01</div>
   <h1>第一章标题</h1>
   <div class="chap-sub">这一章讲什么的<strong>一句话引子</strong>。</div>
 </section>
 ```
-> `data-chapter-title` 会被用于底部章名、数字键跳章、概览分区。改 `chap-tag` 颜色可加内联 `style="color:var(--violet)"`。
+> - `data-chapter-title` 用于底部章名、数字键跳章、概览分区。
+> - `data-chapter-color="#rrggbb"`（可选）给该章一个**主题色**：进入本章后，所有高亮元素（`.accent` / `kicker` / `code` / 卡片顶条 / `chips` / 品牌点）、顶部进度条、底部高亮圆点都变为该色；不写则用默认 `--accent`。**写在该章第一页即可**（整章生效）。
+> - 章内每一页都要带相同的 `data-chapter="N"`；颜色和标题只需写在第一页。
 
 ### 收尾 `closing`
 ```html
