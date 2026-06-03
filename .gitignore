@@ -1,2 +1,5 @@
 node_modules/
 .DS_Store
+
+# 本地预览文件：用真实演示验证模板效果，不入库
+examples/harness-overview.html
