@@ -192,6 +192,24 @@
   .step.shown{opacity:1;transform:none;filter:none;}
   @media (prefers-reduced-motion:reduce){.step{transition:none;}}
 
+  /* ── comments 批注层（评审工具）── */
+  body.commenting{cursor:crosshair;}
+  #comments-layer{position:fixed;inset:0;z-index:25;pointer-events:none;}
+  #comments-layer .cm-marker{position:absolute;pointer-events:auto;transform:translate(-50%,-50%);min-width:22px;height:22px;padding:0 5px;border-radius:50% 50% 50% 3px;background:var(--accent);color:#08111f;font-family:var(--mono);font-size:.72rem;font-weight:700;display:flex;align-items:center;justify-content:center;cursor:pointer;box-shadow:0 4px 14px -4px var(--accent);}
+  #comments-layer .cm-input{position:absolute;pointer-events:auto;width:280px;background:var(--panel);border:1px solid var(--accent);border-radius:10px;padding:.5rem;box-shadow:0 14px 44px -12px #000;}
+  #comments-layer .cm-input textarea{width:100%;height:88px;resize:none;background:#070b16;color:var(--txt);border:1px solid var(--line);border-radius:6px;padding:.5rem;font-family:var(--sans);font-size:.95rem;line-height:1.5;outline:none;cursor:text;}
+  #comments-layer .cm-input .cm-hint{font-family:var(--mono);font-size:.66rem;color:var(--txt-faint);margin-top:.35rem;}
+  #comments-layer .cm-pop{position:absolute;pointer-events:auto;transform:translate(-50%,10px);max-width:300px;background:var(--panel);border:1px solid var(--line);border-radius:10px;padding:.7rem .9rem;font-size:.95rem;line-height:1.5;color:var(--txt);white-space:pre-wrap;box-shadow:0 14px 44px -12px #000;}
+  #cm-banner{position:fixed;top:12px;left:50%;transform:translateX(-50%);z-index:27;display:none;font-family:var(--mono);font-size:.74rem;color:var(--accent);background:rgba(8,12,24,.92);border:1px solid var(--accent);border-radius:20px;padding:.32rem .95rem;}
+  body.commenting #cm-banner{display:block;}
+  #cm-json{position:fixed;inset:0;z-index:30;background:rgba(8,12,24,.96);backdrop-filter:blur(6px);display:none;flex-direction:column;padding:5vh 8vw;}
+  #cm-json.show{display:flex;}
+  #cm-json .cm-jtitle{font-family:var(--mono);font-size:.85rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:1rem;}
+  #cm-json textarea{flex:1;background:#070b16;color:var(--txt);border:1px solid var(--line);border-radius:10px;padding:1rem;font-family:var(--mono);font-size:.85rem;line-height:1.6;resize:none;outline:none;}
+  #cm-json .cm-jbar{display:flex;gap:1rem;align-items:center;margin-top:1rem;}
+  #cm-json .cm-jbtn{font-family:var(--mono);font-size:.8rem;padding:.5rem 1.3rem;border-radius:8px;border:1px solid var(--accent);color:var(--accent);background:rgba(56,224,208,.07);cursor:pointer;}
+  #cm-json .cm-jerr{font-family:var(--mono);font-size:.78rem;color:var(--rose);}
+
   /* ── overview 缩略概览 (新增) ── */
   #overview{position:fixed;inset:0;z-index:30;background:rgba(8,12,24,.96);backdrop-filter:blur(6px);display:none;flex-direction:column;padding:4vh 5vw;overflow-y:auto;}
   #overview.show{display:flex;}
@@ -303,6 +321,9 @@
   <div id="counter"><b id="cur">1</b> / <span id="total">1</span></div>
 </div>
 <div id="overview"><div class="ov-title">概览 · <kbd>↑↓←→</kbd> 选择 · <kbd>Enter</kbd> 跳转 · 点击 / <kbd>Esc</kbd> 关闭</div><div id="ov-body"></div></div>
+<div id="comments-layer"></div>
+<div id="cm-banner">批注模式 · 点击页面任意处留言 · Enter / Esc 退出</div>
+<div id="cm-json"><div class="cm-jtitle">Comments JSON · 编辑或整段粘贴后点「应用」 · Esc 关闭</div><textarea id="cm-json-ta" spellcheck="false"></textarea><div class="cm-jbar"><span class="cm-jbtn" id="cm-json-apply">应用</span><span class="cm-jerr" id="cm-json-err"></span></div></div>
 
 <script>
   const slides = Array.from(document.querySelectorAll('.slide'));
@@ -407,6 +428,91 @@
   function closeOverview() { overview.classList.remove('show'); }
   function toggleOverview() { overview.classList.contains('show') ? closeOverview() : openOverview(); }
 
+  // ── comments 批注（评审工具）：C 进入批注、J 看/编 JSON。仅存内存，靠 JSON 导入导出 ──
+  // 坐标 x/y 为视口比例(0~1)，page 为 1-based 页码；标记在对应页随时显示，点击查看。
+  let comments = [], cmId = 0, commenting = false, cmInput = null;
+  const cmLayer = document.getElementById('comments-layer');
+  const cmJson = document.getElementById('cm-json');
+  const cmJsonTa = document.getElementById('cm-json-ta');
+  const cmJsonErr = document.getElementById('cm-json-err');
+
+  function renderMarkers() {
+    cmLayer.querySelectorAll('.cm-marker, .cm-pop').forEach(e => e.remove());
+    const page = idx + 1;
+    comments.filter(c => c.page === page).forEach(c => {
+      const m = document.createElement('div');
+      m.className = 'cm-marker';
+      m.style.left = (c.x * 100) + '%'; m.style.top = (c.y * 100) + '%';
+      m.textContent = c.id; m.title = '点击查看批注';
+      m.addEventListener('click', (e) => { e.stopPropagation(); showCommentPop(c); });
+      cmLayer.appendChild(m);
+    });
+  }
+  function showCommentPop(c) {
+    cmLayer.querySelectorAll('.cm-pop').forEach(e => e.remove());
+    const p = document.createElement('div');
+    p.className = 'cm-pop';
+    p.style.left = (c.x * 100) + '%'; p.style.top = (c.y * 100) + '%';
+    p.textContent = c.text;
+    p.addEventListener('click', e => e.stopPropagation());
+    cmLayer.appendChild(p);
+    setTimeout(() => {
+      const close = (ev) => { if (!p.contains(ev.target)) { p.remove(); document.removeEventListener('click', close, true); } };
+      document.addEventListener('click', close, true);
+    }, 0);
+  }
+  function confirmInput() {
+    if (!cmInput) return;
+    const text = cmInput.querySelector('textarea').value.trim();
+    const x = parseFloat(cmInput.dataset.x), y = parseFloat(cmInput.dataset.y);
+    cmInput.remove(); cmInput = null;
+    if (text) { comments.push({ id: ++cmId, page: idx + 1, x, y, text }); renderMarkers(); }
+  }
+  function closeInput(commit) {
+    if (!cmInput) return;
+    if (commit) { confirmInput(); return; }
+    cmInput.remove(); cmInput = null;
+  }
+  function openInput(x, y) {
+    closeInput(true);   // 点击其它位置 → 先提交当前
+    const box = document.createElement('div');
+    box.className = 'cm-input';
+    box.style.left = (x * 100) + '%'; box.style.top = (y * 100) + '%';
+    box.dataset.x = x; box.dataset.y = y;
+    box.innerHTML = '<textarea></textarea><div class="cm-hint">Enter 确认 · Shift+Enter 换行 · Esc 取消</div>';
+    cmLayer.appendChild(box);
+    cmInput = box;
+    const ta = box.querySelector('textarea');
+    ta.addEventListener('keydown', (e) => {
+      e.stopPropagation();   // 输入时不触发全局快捷键
+      if (e.key === 'Enter' && !e.shiftKey) { e.preventDefault(); confirmInput(); }
+      else if (e.key === 'Escape') { e.preventDefault(); closeInput(false); }
+    });
+    ta.focus();
+  }
+  function enterCommenting() { commenting = true; document.body.classList.add('commenting'); cmLayer.style.pointerEvents = 'auto'; }
+  function exitCommenting() { closeInput(false); commenting = false; document.body.classList.remove('commenting'); cmLayer.style.pointerEvents = 'none'; }
+  cmLayer.addEventListener('click', (e) => {
+    if (!commenting) return;
+    if (e.target.closest('.cm-marker') || e.target.closest('.cm-input') || e.target.closest('.cm-pop')) return;
+    openInput(e.clientX / window.innerWidth, e.clientY / window.innerHeight);
+  });
+
+  function openJson() { cmJsonTa.value = JSON.stringify(comments, null, 2); cmJsonErr.textContent = ''; cmJson.classList.add('show'); cmJsonTa.focus(); }
+  function closeJson() { cmJson.classList.remove('show'); }
+  function applyJson() {
+    try {
+      const data = JSON.parse(cmJsonTa.value || '[]');
+      if (!Array.isArray(data)) throw new Error('顶层应为数组');
+      comments = data.map((c, i) => ({ id: c.id != null ? c.id : (i + 1), page: parseInt(c.page, 10) || 1, x: +c.x || 0, y: +c.y || 0, text: String(c.text == null ? '' : c.text) }));
+      cmId = comments.reduce((m, c) => Math.max(m, +c.id || 0), 0);
+      closeJson();
+      if (comments.length) go(comments[0].page - 1); else renderMarkers();
+    } catch (err) { cmJsonErr.textContent = '解析失败：' + err.message; }
+  }
+  document.getElementById('cm-json-apply').addEventListener('click', applyJson);
+  cmJson.addEventListener('click', (e) => { if (e.target === cmJson) closeJson(); });
+
   // ── reveal 入场 ──
   const REVEAL_SEL = '.reveal-item';
   let timers = [];
@@ -483,6 +589,7 @@
     updateChapName();
     applyTheme();
     initSteps(dir);
+    renderMarkers();
     runReveal(slides[idx], dir);
     if (dir !== 0 && window.__kickBg) window.__kickBg(dir);
     const want = 'p' + (idx + 1);
@@ -500,6 +607,14 @@
   window.addEventListener('hashchange', applyHash);
 
   document.addEventListener('keydown', (e) => {
+    if (cmJson.classList.contains('show')) {
+      if (e.key === 'Escape') { e.preventDefault(); closeJson(); }
+      return;
+    }
+    if (commenting) {   // 批注模式：禁用其它快捷键；无输入框时 Enter/Esc 退出
+      if (!cmInput && (e.key === 'Enter' || e.key === 'Escape')) { e.preventDefault(); exitCommenting(); }
+      return;
+    }
     if (overview.classList.contains('show')) {
       if (e.key === 'Escape' || e.key === 'o' || e.key === 'O') { e.preventDefault(); closeOverview(); }
       else if (e.key === 'ArrowRight') { e.preventDefault(); moveOvSel(1, 0); }
@@ -517,6 +632,8 @@
     else if (e.key === 'Escape' || e.key === 'o' || e.key === 'O') { e.preventDefault(); toggleOverview(); }
     else if (e.key >= '1' && e.key <= '9') { e.preventDefault(); gotoChapter(parseInt(e.key, 10) - 1); }
     else if (e.key === 'f' || e.key === 'F') { if (!document.fullscreenElement) document.documentElement.requestFullscreen(); else document.exitFullscreen(); }
+    else if (e.key === 'c' || e.key === 'C') { e.preventDefault(); enterCommenting(); }
+    else if (e.key === 'j' || e.key === 'J') { e.preventDefault(); openJson(); }
   });
 
   document.getElementById('deck').addEventListener('click', (e) => {
