@@ -1,5 +1,9 @@
 node_modules/
 .DS_Store
 
+# 本地工作目录 / 设计文档，不入库
+.claude/
+docs/
+
 # 本地预览文件：用真实演示验证模板效果，不入库
 examples/harness-overview.html
