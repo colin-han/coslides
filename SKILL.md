@@ -9,17 +9,17 @@ description: 用 coslides 框架快速生成演示文稿（单文件 HTML slides
 
 ## 框架在哪
 
-skill 同级仓库根目录下：
-- `coslides-template.html` —— 单文件模板（含全部 CSS/JS）。**复制它，只在 `#deck` 内填 `<section>`。**
-- `COMPONENTS.md` —— 组件手册：每个组件的可复制 HTML 片段 + 何时用。**填内容前先读它。**
-- `examples/demo-deck.html` —— 完整范例，照着学结构与组件用法。
+路径相对本 skill 根目录：
+- `assets/coslides-template.html` —— 单文件模板（含全部 CSS/JS）。**复制它，只在 `#deck` 内填 `<section>`。**
+- `references/COMPONENTS.md` —— 组件手册：每个组件的可复制 HTML 片段 + 何时用。**填内容前先读它。**
+- `references/demo-deck.html` —— 完整范例，照着学结构与组件用法。
 
 ## 硬约束（必须遵守）
 
 1. **不要改动模板顶部原有的 `<style>` 和底部原有的 `<script>`**（导航 / 粒子 / 分步等核心逻辑）。配色只改顶部 `:root` 的 `--accent` / `--accent-2` / `--bg`。**做交互时，可以在你自己的 `<section>` 内新增 `<style>` 和 `<script>`**（见「交互与分步」）。
 2. **只在 `#deck` 区域内写 `<section class="slide">`**。
 3. 不要引入任何外部依赖（CDN、字体、图片外链）——产物必须是自包含单文件。
-4. 搭页面优先用 `COMPONENTS.md` 里的现成组件；做交互或自定义视觉时，可在 section 内自由写样式与脚本。布局微调用内联 `style`（如 `style="justify-content:center"`）。
+4. 搭页面优先用 `references/COMPONENTS.md` 里的现成组件；做交互或自定义视觉时，可在 section 内自由写样式与脚本。布局微调用内联 `style`（如 `style="justify-content:center"`）。
 
 ## 工作流：大纲先行，逐章填充
 
@@ -27,7 +27,7 @@ skill 同级仓库根目录下：
 确认主题、核心要点、受众、大致篇幅。信息不足就简短追问（1-2 个问题），不要冗长访谈。
 
 ### 第 2 步 · 读框架
-读 `COMPONENTS.md` 掌握可用组件；必要时翻 `examples/demo-deck.html` 看真实用法。
+读 `references/COMPONENTS.md` 掌握可用组件；必要时翻 `references/demo-deck.html` 看真实用法。
 
 ### 第 3 步 · 产出大纲，停下来确认
 先**不写 HTML**。给用户一个 章→节 大纲，每页标注：页标题 + 拟用组件。例如：
@@ -47,7 +47,7 @@ skill 同级仓库根目录下：
 **等用户确认 / 调整后再继续。** 这是质量关键。
 
 ### 第 4 步 · 逐章填充
-1. 复制 `coslides-template.html` 到目标文件（如 `<主题>-deck.html`）。
+1. 复制 `assets/coslides-template.html` 到目标文件（如 `<主题>-deck.html`）。
 2. 改 `<title>` 和 `#brandname` 为本演示的标题 / 品牌。
 3. 需要换主色时改顶部 `:root` 的 `--accent`。
 4. 清空 `#deck` 内的占位示例 section，按大纲逐章写：
@@ -63,7 +63,7 @@ skill 同级仓库根目录下：
 - [ ] `data-chapter` 编号连续（1,2,3…），每章首页有 `data-chapter-title`
 - [ ] 无占位符残留（"写在这里""TAG""说明文字"等）、无空 `<section>`
 - [ ] 无外部依赖（CDN / 外链字体图片）
-- [ ] 组件片段结构正确（对照 `COMPONENTS.md`）
+- [ ] 组件片段结构正确（对照 `references/COMPONENTS.md`）
 - [ ] 若用分步：`.step` 或 `data-steps` 已就位，空格推进、推完翻页符合预期
 
 ### 第 6 步 · 交付

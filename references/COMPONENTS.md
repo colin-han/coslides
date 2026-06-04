@@ -1,6 +1,6 @@
 # coslides 组件参考手册
 
-> 复制片段到 `coslides-template.html` 的 `#deck` 内即可。所有组件已在模板的 `<style>` 中定义，**不要新增/修改 CSS**（仅顶部 `:root` 配置区可改主色）。
+> 复制片段到模板 `assets/coslides-template.html` 的 `#deck` 内即可。所有组件已在模板的 `<style>` 中定义，**不要新增/修改 CSS**（仅顶部 `:root` 配置区可改主色）。
 >
 > 通用约定：
 > - 每页是一个 `<section class="slide">`，首页加 `active`。
@@ -232,4 +232,4 @@
 | 全屏 | `F` |
 | 深链 | URL `#p7` 直达第 7 页 |
 
-> **分步 / 交互**：给元素加 `class="step"` 即可空格逐个揭示；复杂交互用 `data-steps="N"` + 监听 section 上的 `coslides:step` 事件（`detail:{step,total,dir}`），可在 section 内自由写 `<script>`/`<style>`。详见 `skill/SKILL.md`「交互与分步演示」。
+> **分步 / 交互**：给元素加 `class="step"` 即可空格逐个揭示；复杂交互用 `data-steps="N"` + 监听 section 上的 `coslides:step` 事件（`detail:{step,total,dir}`），可在 section 内自由写 `<script>`/`<style>`。详见 `../SKILL.md`「交互与分步演示」。
