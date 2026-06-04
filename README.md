@@ -1,18 +1,53 @@
 # coslides
 
-> 一个用于**快速生成演示文稿**的单文件 JS/CSS 框架——你只写每页内容，导航、快捷键、背景、分步、章节主题色全部内置。专为「让 AI 生成 slides」设计，也可手写。
+> 一个让 **AI 帮你做演示文稿**的 skill。装上它，对 Claude 说一句「用 coslides 做一份关于 X 的演示」，就能得到一个**自包含的单文件 HTML deck**——暗色科技风、全套键盘导航、分步演示、章节主题色全部内置，双击即放映、发给谁都能直接打开。
 
-产物始终是**一个自包含的 HTML 文件**：无构建、无依赖、无外链，双击即放映，发给谁都能直接打开。
+coslides 是一个标准的 [Claude Code skill](https://docs.claude.com/claude-code)：`SKILL.md` 教 AI 怎么用，`assets/` 放它复制的模板，`references/` 放它查阅的组件手册与范例。AI 只负责写每页内容、按章节组织，视觉与交互这套「引擎」由框架包办——既保证出片质量，又不必每次重造轮子。
 
 ---
 
-## 快速开始
+## 这个 skill 解决什么
+
+让 AI 生成演示页面时，常见两个问题：每次重写几百行 CSS/JS（费 token、风格漂移），以及产物花哨却不好用（没有导航、没法分步讲）。coslides 把**视觉系统 + 导航系统 + 组件库**沉淀成一个固定的单文件模板，AI 只往 `#deck` 里填内容、用 `data-chapter` 分章。于是：
+
+- **省心** — AI 不碰样式与脚本，只关注「讲什么、怎么分章」。
+- **一致** — 每份 deck 都是同一套打磨过的暗色风与交互。
+- **能用** — 产物是真正可放映的演示：键盘翻页、跳章、概览、分步、全屏、深链。
+
+---
+
+## 安装
+
+把本仓库（`SKILL.md` 所在的 `coslides/` 目录）放到 Claude Code 的 skills 目录即可：
+
+```bash
+git clone <repo> ~/.claude/skills/coslides
+# 或：cp -r coslides ~/.claude/skills/
+```
+
+Claude 会自动发现该 skill（`name: coslides`）。无需任何运行时或依赖。
+
+---
+
+## 用法
+
+### 让 AI 生成（主要方式）
+
+对 Claude 说：
+
+> 用 coslides 做一份关于 X 的演示
+
+AI 会按 `SKILL.md` 的工作流：**接选题 → 给出「章→节」大纲让你确认 → 复制模板逐章填内容 → 自检 → 产出单文件 HTML**。整个过程它只写内容与章节，视觉/导航/分步由框架负责。
+
+### 手动写（可选）
+
+不想用 AI 也行，自己复制模板填内容：
 
 ```bash
 cp assets/coslides-template.html my-talk.html
 ```
 
-打开 `my-talk.html`，只在 `#deck` 区域内填 `<section class="slide">`，**不要改动模板顶部的 `<style>` 和底部的 `<script>`**（换主色只改顶部 `:root` 的 `--accent`）。双击文件即可放映。
+只在 `#deck` 内填 `<section class="slide">`，**不要改动模板顶部的 `<style>` 和底部的 `<script>`**（换主色只改顶部 `:root` 的 `--accent`）。双击即放映。
 
 ```html
 <div id="deck">
@@ -43,7 +78,27 @@ cp assets/coslides-template.html my-talk.html
 
 ---
 
-## 特性
+## skill 如何组织
+
+按标准 skill 结构：`SKILL.md` 在根，配 `assets/`（产物用到的模板）与 `references/`（按需查阅的手册与范例）。
+
+```
+coslides/                        # skill 根目录（放进 ~/.claude/skills/）
+├── SKILL.md                     # 教 AI 怎么用：工作流 + 硬约束 + 组件速查
+├── README.md
+├── assets/
+│   └── coslides-template.html   # 单文件模板（AI 复制它 / 产物即由它生成）
+└── references/
+    ├── COMPONENTS.md            # 组件参考手册：每个组件的 HTML 片段 + 何时用
+    └── demo-deck.html           # 能力全展示范例（18 页 4 章，含分步 / canvas / 主题色）
+```
+
+- AI 读 `SKILL.md` 学流程 → 读 `references/COMPONENTS.md` 查组件 → 复制 `assets/coslides-template.html` → 只填 `#deck` → 自检 → 交付单文件。
+- `references/harness-overview.html` 是本地预览文件，已 gitignore。
+
+---
+
+## 产物特性
 
 - **单文件 · 零依赖** — 一个 HTML 搞定，离线可放映、可分享。
 - **暗色科技风** — 网格背景、径向光晕、Canvas 粒子（翻页有方向性「whoosh」）。
@@ -53,7 +108,6 @@ cp assets/coslides-template.html my-talk.html
 - **分步演示（steps）** — 空格在页内逐步展开（Keynote builds），三种写法从零代码到事件驱动。
 - **即时交互** — 任意元素可挂 `onclick` / `onmouseover`，与分步正交。
 - **完整导航** — 键盘 / 点击 / 触摸 / URL 深链，全部内置无需配置。
-- **AI 友好** — 配套 skill，让 AI 只写内容、按章组织即可产出风格统一的 deck。
 
 ---
 
@@ -87,35 +141,6 @@ cp assets/coslides-template.html my-talk.html
 
 ### 配色
 改模板顶部 `:root` 的 `--accent` / `--accent-2` / `--bg` 即可全局换色；章节主题色由 `data-chapter-color` 覆盖。
-
----
-
-## 项目结构
-
-本仓库按标准 skill 结构组织（`SKILL.md` 在根，配 `assets/` 与 `references/`）：
-
-```
-coslides/                        # skill 根目录
-├── SKILL.md                     # coslides skill：引导 AI 大纲先行→逐章填充
-├── README.md
-├── assets/
-│   └── coslides-template.html   # 单文件模板（复制它开始 / 产物即由它生成）
-└── references/
-    ├── COMPONENTS.md            # 组件参考手册：每个组件的 HTML 片段 + 何时用
-    └── demo-deck.html           # 能力全展示范例（18 页 4 章，含分步 / canvas / 主题色）
-```
-
-> `references/harness-overview.html` 是本地预览文件，已 gitignore。
-
----
-
-## 让 AI 生成 slides
-
-把本目录作为一个 skill 安装（即 `SKILL.md` 所在的 `coslides/` 目录）后，对 AI 说一句：
-
-> 用 coslides 做一份关于 X 的演示
-
-AI 会：接选题 → 给出章→节大纲让你确认 → 复制模板逐章填内容 → 自检 → 产出单文件 HTML。它只关注内容与章节组织，视觉、导航、分步由框架包办。
 
 ---
 
