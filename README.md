@@ -21,7 +21,7 @@ coslides 是一个标准的 [Claude Code skill](https://docs.claude.com/claude-c
 把本仓库（`SKILL.md` 所在的 `coslides/` 目录）放到 Claude Code 的 skills 目录即可：
 
 ```bash
-git clone <repo> ~/.claude/skills/coslides
+git clone https://github.com/colin-han/coslides.git ~/.claude/skills/coslides
 # 或：cp -r coslides ~/.claude/skills/
 ```
 
