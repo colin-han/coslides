@@ -12,7 +12,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <!-- ↓ 改这里：deck 标题（浏览器标签 + 分享标题） -->
-<title>coslides · 用 AI 快速生成演示文稿</title>
+<title>coslides · 框架能力全展示</title>
 <style>
   :root {
     /* ═══ coslides 配置区：改这几行就能换主色/风格 ═══ */
@@ -178,7 +178,7 @@
   #dots .d.on{background:var(--accent);transform:scale(1.3);}
   #dots .gap{width:10px;}
   #counter b{color:var(--txt);}
-  #progress{position:fixed;top:0;left:0;height:3px;background:linear-gradient(90deg,var(--accent),var(--accent-2));z-index:11;transition:width .35s ease;}
+  #progress{position:fixed;top:0;left:0;height:3px;background:var(--accent);z-index:11;transition:width .35s ease,background .35s ease;}
   .nav-hint{position:fixed;bottom:64px;right:2.2vw;font-family:var(--mono);font-size:.72rem;color:var(--txt-faint);z-index:10;opacity:.7;}
   kbd{border:1px solid var(--line);border-radius:4px;padding:.05rem .4rem;color:var(--txt-dim);}
 
@@ -186,6 +186,11 @@
   .reveal-item{opacity:0;transform:translate(var(--enter-x,0px),var(--enter-y,20px));filter:blur(2px);transition:opacity .5s cubic-bezier(.2,.7,.2,1),transform .5s cubic-bezier(.2,.7,.2,1),filter .5s ease;}
   .slide.active .reveal-item.in{opacity:1;transform:none;filter:none;}
   @media (prefers-reduced-motion:reduce){.reveal-item{transition:none;opacity:1;transform:none;filter:none;}#brand .dot{animation:none;}}
+
+  /* ── step 分步：默认隐藏，框架推进时给第 N 个加 .shown ── */
+  .step{opacity:0;transform:translateY(18px);filter:blur(2px);transition:opacity .45s cubic-bezier(.2,.7,.2,1),transform .45s cubic-bezier(.2,.7,.2,1),filter .45s ease;}
+  .step.shown{opacity:1;transform:none;filter:none;}
+  @media (prefers-reduced-motion:reduce){.step{transition:none;}}
 
   /* ── overview 缩略概览 (新增) ── */
   #overview{position:fixed;inset:0;z-index:30;background:rgba(8,12,24,.96);backdrop-filter:blur(6px);display:none;flex-direction:column;padding:4vh 5vw;overflow-y:auto;}
@@ -209,40 +214,44 @@
      ↓↓↓ 只编辑这个 #deck 区域 ↓↓↓
      · 每页一个 <section class="slide">；首页加 active。
      · 章节用 data-chapter="N"，章首页（chapter 页）再加 data-chapter-title="…"。
+       可选 data-chapter-color="#rrggbb" 给该章一个主题色（高亮/进度条/圆点随之变色）。
      · 封面 / 议程 / 收尾不属于任何章，不写 data-chapter。
-     · 需要逐项入场的元素加 class="reveal-item"。
+     · 需要逐项入场的元素加 class="reveal-item"（进页自动错峰浮现）。
+     · 需要空格逐步推进的元素加 class="step"（默认隐藏，每按空格揭示一个）；
+       复杂交互见 COMPONENTS.md「交互与分步」：data-steps / coslides:step 事件。
      ════════════════════════════════════════════════════════════════════ -->
 <div id="deck">
 
   <!-- 封面 -->
   <section class="slide title-slide active">
-    <div class="kicker">coslides · 框架演示</div>
-    <h1>用 AI 快速生成<br><span class="accent">演示文稿</span></h1>
-    <div class="sub">一个单文件 JS/CSS 框架——你只写每页内容，框架负责导航、快捷键、背景与统一风格。<br>本 deck 本身就是用 coslides 写的。</div>
+    <div class="kicker">coslides · 能力全展示</div>
+    <h1>一个 HTML，<br><span class="accent">讲一场好演示</span></h1>
+    <div class="sub">单文件、零依赖。你只写每页内容，导航、快捷键、背景、分步、章节主题色全部内置。<br>本 deck 本身就是用 coslides 写的——边看边按键体验。</div>
     <div class="title-meta">
-      <div>范围 · <b>组件 / 导航 / 工作流</b></div>
-      <div>提示 · <b>按 O 看概览，1-3 跳章</b></div>
+      <div>试试 · <b>空格推进 · ←→翻页 · 1-4跳章 · Esc概览 · F全屏</b></div>
+      <div>每章 · <b>有自己的主题色，连背景光点都跟着变</b></div>
     </div>
   </section>
 
   <!-- 议程 -->
   <section class="slide">
     <div class="kicker">本场议程</div>
-    <h2>三个部分，<span class="accent">从是什么到怎么用</span></h2>
+    <h2>四章，<span class="accent">把框架能力走一遍</span></h2>
     <div class="grow">
       <div class="agenda">
-        <div class="ag-item reveal-item"><div class="n">1</div><div><div class="t">这是什么</div><div class="d">框架定位与交付物</div></div></div>
-        <div class="ag-item reveal-item"><div class="n">2</div><div><div class="t">组件长什么样</div><div class="d">卡片 / 终端 / 流程 / 问答</div></div></div>
-        <div class="ag-item reveal-item"><div class="n">3</div><div><div class="t">AI 怎么用它</div><div class="d">大纲先行、逐章填充</div></div></div>
+        <div class="ag-item reveal-item"><div class="n">1</div><div><div class="t">视觉与导航</div><div class="d">暗色风 · 粒子 · 全套快捷键</div></div></div>
+        <div class="ag-item reveal-item"><div class="n">2</div><div><div class="t">组件库</div><div class="d">卡片 / 终端 / 流程 / 代码…</div></div></div>
+        <div class="ag-item reveal-item"><div class="n">3</div><div><div class="t">分步与交互</div><div class="d">空格逐步推进 · 事件驱动 canvas</div></div></div>
+        <div class="ag-item reveal-item"><div class="n">4</div><div><div class="t">给 AI 用</div><div class="d">大纲先行 · 逐章填充</div></div></div>
       </div>
     </div>
   </section>
 
-  <!-- ══ 第 1 章 ══ -->
-  <section class="slide chapter" data-chapter="1" data-chapter-title="这是什么">
+  <!-- ══════════ 第 1 章 · 视觉与导航（青）══════════ -->
+  <section class="slide chapter" data-chapter="1" data-chapter-title="视觉与导航" data-chapter-color="#38e0d0">
     <div class="chap-tag">PART · 01</div>
-    <h1>这是什么</h1>
-    <div class="chap-sub">一个<strong>单文件自包含</strong>的演示框架——复制模板、填内容、双击打开。</div>
+    <h1>视觉与导航</h1>
+    <div class="chap-sub">每章一个主题色——<strong>高亮、进度条、圆点、背景光点</strong>都会跟着这一章变。注意看本章是<strong style="color:#38e0d0">青色</strong>。</div>
   </section>
 
   <section class="slide" data-chapter="1">
@@ -251,118 +260,223 @@
     <div class="grow">
       <div class="cards c3">
         <div class="card reveal-item"><div class="top"></div><div class="icon">◰</div><div class="tag">视觉系统</div><h3>暗色科技风</h3><p>网格背景、径向光晕、Canvas 粒子、统一调色板，改一个变量就换主色。</p></div>
-        <div class="card b-violet reveal-item"><div class="top"></div><div class="icon">⌘</div><div class="tag">导航系统</div><h3>开箱即用</h3><p>键盘 / 点击 / 触摸翻页、章节跳转、缩略概览、进度条、深链 hash。</p></div>
-        <div class="card b-emerald reveal-item"><div class="top"></div><div class="icon">▤</div><div class="tag">组件库</div><h3>12 类积木</h3><p>卡片、列表、终端、目录树、流程图、问答气泡……拼出一页只需几行 HTML。</p></div>
+        <div class="card b-violet reveal-item"><div class="top"></div><div class="icon">⌘</div><div class="tag">导航系统</div><h3>开箱即用</h3><p>键盘 / 点击 / 触摸翻页、分步推进、章节跳转、缩略概览、进度条、深链。</p></div>
+        <div class="card b-emerald reveal-item"><div class="top"></div><div class="icon">▤</div><div class="tag">组件库</div><h3>12 类积木</h3><p>卡片、列表、终端、目录树、流程图、问答气泡……几行 HTML 拼一页。</p></div>
       </div>
     </div>
   </section>
 
   <section class="slide" data-chapter="1">
-    <div class="kicker"><span class="ch">01 ·</span> 交付物</div>
-    <h2>四个文件，<span class="accent">职责清晰</span></h2>
-    <div class="grow">
-      <div class="tree reveal-item"><span class="b">coslides/</span>
-├── <span class="hl">coslides-template.html</span>   <span class="cm"># ① 单文件模板：复制它，填 #deck</span>
-├── COMPONENTS.md           <span class="cm"># ② 组件手册：每个组件的片段 + 何时用</span>
-├── <span class="d">examples/</span>
-│   └── demo-deck.html      <span class="cm"># ③ 本范例：照着学结构</span>
-└── <span class="d">skill/</span>
-    └── SKILL.md            <span class="cm"># ④ skill：引导 AI 大纲先行→逐章填充</span></div>
-      <p class="lead reveal-item" style="margin-top:1.4rem;">产物始终是<strong>一个</strong>自包含 HTML——无依赖、无构建，发给谁都能直接打开。</p>
+    <div class="kicker"><span class="ch">01 ·</span> 导航与快捷键</div>
+    <h2>全部<span class="accent">内置，无需配置</span></h2>
+    <div class="grow two-col">
+      <ul class="feat">
+        <li class="reveal-item"><span class="mk">␣</span><span><b>空格 / 点击</b> <span class="dim">— 页内有步骤先推进，推完才翻页</span></span></li>
+        <li class="reveal-item"><span class="mk">↔</span><span><b>← →</b> <span class="dim">— 始终整页翻动，跳过剩余步骤</span></span></li>
+        <li class="reveal-item"><span class="mk">#</span><span><b>1–9</b> <span class="dim">— 直接跳到第 N 章</span></span></li>
+      </ul>
+      <ul class="feat">
+        <li class="reveal-item"><span class="mk">▦</span><span><b>Esc</b> <span class="dim">— 弹出缩略概览，按章分区点击跳转</span></span></li>
+        <li class="reveal-item"><span class="mk">⛶</span><span><b>F</b> <span class="dim">— 全屏放映</span></span></li>
+        <li class="reveal-item"><span class="mk">🔗</span><span><b>#p7</b> <span class="dim">— URL 深链直达第 7 页</span></span></li>
+      </ul>
     </div>
   </section>
 
-  <!-- ══ 第 2 章 ══ -->
-  <section class="slide chapter" data-chapter="2" data-chapter-title="组件长什么样">
-    <div class="chap-tag" style="color:var(--violet)">PART · 02</div>
-    <h1 style="color:var(--violet)">组件长什么样</h1>
-    <div class="chap-sub">挑几个常用组件现场看效果——<strong style="color:var(--violet)">这一章每页都是真组件</strong>。</div>
+  <!-- ══════════ 第 2 章 · 组件库（紫）══════════ -->
+  <section class="slide chapter" data-chapter="2" data-chapter-title="组件库" data-chapter-color="#a78bfa">
+    <div class="chap-tag" style="color:#a78bfa">PART · 02</div>
+    <h1 style="color:#a78bfa">组件库</h1>
+    <div class="chap-sub">本章换成<strong style="color:#a78bfa">紫色</strong>——同一份内容，配色整体切换。下面挑常用组件看看。</div>
   </section>
 
   <section class="slide" data-chapter="2">
-    <div class="kicker"><span class="ch">02 ·</span> term · 终端模拟</div>
-    <h2>演示命令行，<span class="accent">像真终端一样</span></h2>
+    <div class="kicker"><span class="ch">02 ·</span> card · 卡片 + chips · 标签</div>
+    <h2>并列要点，<span class="accent">多色调区分</span></h2>
+    <div class="grow">
+      <div class="cards c3">
+        <div class="card reveal-item"><div class="top"></div><div class="tag">DEFAULT</div><h3>主色卡</h3><p>默认顶条用当前主题色。</p></div>
+        <div class="card b-amber reveal-item"><div class="top"></div><div class="tag">AMBER</div><h3>琥珀卡</h3><p>b-amber / b-blue / b-rose / b-emerald / b-violet 任选。</p></div>
+        <div class="card b-blue reveal-item"><div class="top"></div><div class="tag">BLUE</div><h3>蓝卡</h3><p>hover 有抬升与描边。</p></div>
+      </div>
+      <div class="chips reveal-item" style="margin-top:1.2rem;justify-content:center;">
+        <span class="chip">chip 标签</span><span class="chip">等宽</span><span class="chip">主题色</span><span class="chip">可换行</span>
+      </div>
+    </div>
+  </section>
+
+  <section class="slide" data-chapter="2">
+    <div class="kicker"><span class="ch">02 ·</span> term · 终端 + tree · 目录树</div>
+    <h2>命令行与文件结构，<span class="accent">原生质感</span></h2>
     <div class="grow two-col">
       <div class="term reveal-item">
         <div class="bar"><i class="r"></i><i class="y"></i><i class="g"></i></div>
-        <div class="ln"><span class="dim">$</span> cp coslides-template.html my-talk.html</div>
-        <div class="ln"><span class="dim">$</span> open my-talk.html</div>
+        <div class="ln"><span class="dim">$</span> open deck.html</div>
         <div class="ln"><span class="ok">✓</span> 导航就绪</div>
         <div class="ln"><span class="ok">✓</span> 快捷键就绪</div>
-        <div class="ln"><span class="run">▶</span> 开始填内容 <span class="dim">…</span></div>
+        <div class="ln"><span class="run">▶</span> 放映中 <span class="dim">…</span></div>
       </div>
-      <div>
-        <ul class="feat">
-          <li class="reveal-item"><span class="mk">▸</span><span><b>零安装</b> <span class="dim">— 没有 npm、没有构建</span></span></li>
-          <li class="reveal-item"><span class="mk">▸</span><span><b>零依赖</b> <span class="dim">— 纯静态单文件</span></span></li>
-          <li class="reveal-item"><span class="mk">▸</span><span><b>可离线</b> <span class="dim">— 断网也能放</span></span></li>
-        </ul>
-      </div>
+      <div class="tree reveal-item"><span class="b">coslides/</span>
+├── <span class="hl">coslides-template.html</span>  <span class="cm"># 模板</span>
+├── COMPONENTS.md
+├── <span class="d">examples/</span>
+│   └── demo-deck.html
+└── <span class="d">skill/</span>SKILL.md</div>
     </div>
   </section>
 
   <section class="slide" data-chapter="2">
-    <div class="kicker"><span class="ch">02 ·</span> pipeline · 流程条</div>
-    <h2>线性步骤，<span class="accent">一目了然</span></h2>
+    <div class="kicker"><span class="ch">02 ·</span> pre.code · 代码 + pipeline · 流程条</div>
+    <h2>代码高亮与<span class="accent">线性步骤</span></h2>
     <div class="grow">
-      <div class="pipe">
-        <div class="pnode reveal-item"><div class="pc">① 复制模板</div><div class="pd">得到空白 deck</div></div>
+      <pre class="code reveal-item"><span class="k">function</span> <span class="f">slide</span>(title) {
+  <span class="k">return</span> <span class="s">`&lt;section class="slide"&gt;${title}&lt;/section&gt;`</span>;  <span class="c">// 就这么简单</span>
+}</pre>
+      <div class="pipe" style="margin-top:1.4rem;">
+        <div class="pnode reveal-item"><div class="pc">写内容</div><div class="pd">填 #deck</div></div>
         <div class="psep reveal-item">→</div>
-        <div class="pnode reveal-item"><div class="pc">② 列大纲</div><div class="pd">章 / 节结构</div></div>
+        <div class="pnode reveal-item"><div class="pc">双击打开</div><div class="pd">浏览器即放映</div></div>
         <div class="psep reveal-item">→</div>
-        <div class="pnode reveal-item"><div class="pc">③ 填内容</div><div class="pd">选组件拼页</div></div>
-        <div class="psep reveal-item">→</div>
-        <div class="pnode reveal-item"><div class="pc">④ 打开</div><div class="pd">双击即放映</div></div>
+        <div class="pnode reveal-item"><div class="pc">分享</div><div class="pd">单文件发给谁都行</div></div>
       </div>
     </div>
   </section>
 
   <section class="slide" data-chapter="2">
-    <div class="kicker"><span class="ch">02 ·</span> chat · 点击揭示</div>
-    <h2>现场互动，<span class="accent">先抛问题再揭答案</span></h2>
+    <div class="kicker"><span class="ch">02 ·</span> flow · 决策图 + note-card · 强调框</div>
+    <h2>分支决策与<span class="accent">一句结论</span></h2>
+    <div class="grow" style="justify-content:center;gap:1.4rem;">
+      <div style="display:flex;flex-direction:column;align-items:center;gap:.6rem;max-width:760px;margin:0 auto;width:100%;">
+        <div class="flow-decide reveal-item" style="width:100%;">这页适合分步吗？<div class="sub2">有顺序 / 有数据 / 有流程 → 适合</div></div>
+        <div class="reveal-item" style="display:flex;gap:1.2rem;width:100%;">
+          <div class="flow-out a">→ 用 step 分步</div>
+          <div class="flow-out b">→ 保持静态</div>
+        </div>
+      </div>
+      <div class="note-card reveal-item">💡 组件可自由嵌套组合，<strong>布局微调用内联 style 即可</strong>，无需新增 CSS。</div>
+    </div>
+  </section>
+
+  <!-- ══════════ 第 3 章 · 分步与交互（绿）══════════ -->
+  <section class="slide chapter" data-chapter="3" data-chapter-title="分步与交互" data-chapter-color="#4ade80">
+    <div class="chap-tag" style="color:#4ade80">PART · 03</div>
+    <h1 style="color:#4ade80">分步与交互</h1>
+    <div class="chap-sub">本章<strong style="color:#4ade80">绿色</strong>主题。空格让页面随讲解逐步展开——三种写法，从零代码到事件驱动。</div>
+  </section>
+
+  <section class="slide" data-chapter="3">
+    <div class="kicker"><span class="ch">03 ·</span> 写法① 声明式 step</div>
+    <h2>加 <span class="accent">class="step"</span>，空格逐个揭示</h2>
+    <div class="grow two-col">
+      <ul class="feat">
+        <li class="step"><span class="mk">▸</span><span><b>第一步</b> <span class="dim">— 按一次空格我才出现</span></span></li>
+        <li class="step"><span class="mk">▸</span><span><b>第二步</b> <span class="dim">— 再按一次</span></span></li>
+        <li class="step"><span class="mk">▸</span><span><b>第三步</b> <span class="dim">— 推完后空格才翻页</span></span></li>
+      </ul>
+      <pre class="code reveal-item"><span class="c">&lt;!-- 零 JS / 零 CSS --&gt;</span>
+&lt;li class=<span class="s">"step"</span>&gt;第一步&lt;/li&gt;
+&lt;li class=<span class="s">"step"</span>&gt;第二步&lt;/li&gt;
+&lt;li class=<span class="s">"step"</span>&gt;第三步&lt;/li&gt;</pre>
+    </div>
+  </section>
+
+  <section class="slide" data-chapter="3" data-steps="4">
+    <style>
+      #cssflow .dn{flex:1;text-align:center;padding:1.1rem .8rem;border:1px solid var(--line);border-radius:12px;background:var(--panel);font-family:var(--mono);opacity:.22;transition:opacity .45s,border-color .45s,box-shadow .45s;}
+      #cssflow .sep{align-self:center;color:var(--txt-faint);opacity:.22;transition:opacity .45s;}
+      [data-step="1"] #cssflow .dn:nth-of-type(1),
+      [data-step="2"] #cssflow .dn:nth-of-type(-n+3),
+      [data-step="3"] #cssflow .dn:nth-of-type(-n+5),
+      [data-step="4"] #cssflow .dn{opacity:1;border-color:var(--accent);box-shadow:0 0 18px -10px var(--accent);}
+      [data-step="2"] #cssflow .sep:nth-of-type(2),
+      [data-step="3"] #cssflow .sep,
+      [data-step="4"] #cssflow .sep{opacity:1;}
+    </style>
+    <div class="kicker"><span class="ch">03 ·</span> 写法② 纯 CSS 按步响应</div>
+    <h2>用 <span class="accent">data-step</span> 让节点逐个点亮</h2>
+    <div class="grow" style="justify-content:center;">
+      <div id="cssflow" style="display:flex;gap:.6rem;max-width:920px;margin:0 auto;width:100%;">
+        <div class="dn">① 解析</div><div class="sep">→</div>
+        <div class="dn">② 构建</div><div class="sep">→</div>
+        <div class="dn">③ 校验</div><div class="sep">→</div>
+        <div class="dn">④ 产出</div>
+      </div>
+      <p class="lead reveal-item" style="text-align:center;margin-top:1.6rem;max-width:none;">框架把当前步数写进 <code>data-step</code>，section 内一段 <code>&lt;style&gt;</code> 用属性选择器响应——<strong>无 JS</strong>。</p>
+    </div>
+  </section>
+
+  <section class="slide" data-chapter="3" data-steps="5">
+    <div class="kicker"><span class="ch">03 ·</span> 写法③ 事件驱动 · canvas</div>
+    <h2>监听 <span class="accent">coslides:step</span>，每步画一根柱</h2>
+    <div class="grow" style="justify-content:center;align-items:center;">
+      <canvas id="bars" width="900" height="320" style="max-width:92%;height:auto;"></canvas>
+      <p class="lead reveal-item" style="text-align:center;margin-top:1.2rem;max-width:none;">空格驱动 canvas 逐帧作画，柱子用当前主题色（<strong style="color:#4ade80">绿</strong>）。这类丰富交互写在 section 自己的 <code>&lt;script&gt;</code> 里。</p>
+    </div>
+    <script>
+      (function () {
+        const sec = document.currentScript.parentElement;
+        const cv = sec.querySelector('#bars'), ctx = cv.getContext('2d');
+        const data = [45, 78, 56, 92, 67];
+        function draw(step) {
+          ctx.clearRect(0, 0, cv.width, cv.height);
+          const accent = (getComputedStyle(document.documentElement).getPropertyValue('--accent') || '#4ade80').trim();
+          const n = data.length, gap = 46, bw = (cv.width - gap * (n + 1)) / n, base = cv.height - 34;
+          ctx.font = '16px "SF Mono",monospace'; ctx.textAlign = 'center';
+          for (let i = 0; i < n; i++) {
+            const x = gap + i * (bw + gap);
+            const full = data[i] / 100 * (base - 20);
+            const h = i < step ? full : 0;
+            ctx.fillStyle = accent; ctx.globalAlpha = 0.9;
+            ctx.fillRect(x, base - h, bw, h);
+            ctx.globalAlpha = 1; ctx.fillStyle = '#9fb0cc';
+            ctx.fillText('#' + (i + 1), x + bw / 2, base + 22);
+          }
+        }
+        sec.addEventListener('coslides:step', (e) => draw(e.detail.step));
+        draw(0);
+      })();
+    </script>
+  </section>
+
+  <section class="slide" data-chapter="3">
+    <div class="kicker"><span class="ch">03 ·</span> 即时交互（与分步正交）</div>
+    <h2>点击 / 悬停，<span class="accent">框架不干预</span></h2>
     <div class="grow" style="justify-content:center;">
       <div class="chat">
         <div class="bubble ai reveal-item">
           <div class="who">🤖 提问</div>
-          <div class="text">想换个主色，比如把青色换成<span class="hl">橙色</span>，要改几处？</div>
+          <div class="text">任意元素挂 <code>onclick</code> 就能做即时交互——点下面这条试试？</div>
         </div>
         <div class="bubble human reveal-item" onclick="this.classList.toggle('revealed')">
           <div class="who">🧑 回答</div>
-          <div class="answer">一处——顶部 <code>--accent</code> 变量。整套配色自动跟随。</div>
+          <div class="answer">对，这就是 onclick 揭示，和 step 分步互不影响，可同页混用。</div>
           <div class="placeholder">点击揭示回答…</div>
         </div>
       </div>
     </div>
   </section>
 
-  <section class="slide" data-chapter="2">
-    <div class="kicker"><span class="ch">02 ·</span> note-card · 强调框</div>
-    <div class="grow" style="justify-content:center;">
-      <div class="note-card reveal-item">
-        💡 还有更多组件没在这里展示：<strong>flow 决策图</strong>、<strong>code 代码块</strong>、<strong>chips 标签</strong>、<strong>card 多色调</strong>、<strong>two-col 两栏</strong>……<br><br>
-        全部片段见 <code>COMPONENTS.md</code>，复制即用。
-      </div>
-    </div>
+  <!-- ══════════ 第 4 章 · 给 AI 用（琥珀）══════════ -->
+  <section class="slide chapter" data-chapter="4" data-chapter-title="给 AI 用" data-chapter-color="#fbbf24">
+    <div class="chap-tag" style="color:#fbbf24">PART · 04</div>
+    <h1 style="color:#fbbf24">给 AI 用</h1>
+    <div class="chap-sub">本章<strong style="color:#fbbf24">琥珀色</strong>。配套 skill 让 AI 只写内容、按章组织，框架包办其余。</div>
   </section>
 
-  <!-- ══ 第 3 章 ══ -->
-  <section class="slide chapter" data-chapter="3" data-chapter-title="AI 怎么用它">
-    <div class="chap-tag" style="color:var(--emerald)">PART · 03</div>
-    <h1 style="color:var(--emerald)">AI 怎么用它</h1>
-    <div class="chap-sub">配套 skill 引导：<strong style="color:var(--emerald)">大纲先行、逐章填充、自检产出</strong>。</div>
-  </section>
-
-  <section class="slide" data-chapter="3">
-    <div class="kicker"><span class="ch">03 ·</span> 工作流</div>
-    <h2>从一句话选题<span class="accent">到一份 deck</span></h2>
+  <section class="slide" data-chapter="4">
+    <div class="kicker"><span class="ch">04 ·</span> 工作流</div>
+    <h2>从一句选题<span class="accent">到一份 deck</span></h2>
     <div class="grow">
-      <ul class="feat">
-        <li class="reveal-item"><span class="mk">①</span><span><b>接选题</b> <span class="dim">— 你给主题、要点、受众</span></span></li>
-        <li class="reveal-item"><span class="mk">②</span><span><b>列大纲</b> <span class="dim">— AI 产出 章→节 结构 + 每页拟用组件，停下来给你确认</span></span></li>
-        <li class="reveal-item"><span class="mk">③</span><span><b>逐章填充</b> <span class="dim">— 复制模板，按章写 section，选组件填内容</span></span></li>
-        <li class="reveal-item"><span class="mk">④</span><span><b>自检</b> <span class="dim">— 样式未被改动、章节连续、无占位符、首页有 active</span></span></li>
-        <li class="reveal-item"><span class="mk">⑤</span><span><b>产出</b> <span class="dim">— 一个单文件 HTML，直接放映或分享</span></span></li>
-      </ul>
+      <div class="pipe">
+        <div class="pnode reveal-item"><div class="pc">① 接选题</div><div class="pd">主题 / 受众 / 篇幅</div></div>
+        <div class="psep reveal-item">→</div>
+        <div class="pnode reveal-item"><div class="pc">② 列大纲</div><div class="pd">章→节，停下确认</div></div>
+        <div class="psep reveal-item">→</div>
+        <div class="pnode reveal-item"><div class="pc">③ 逐章填充</div><div class="pd">选组件、按需分步</div></div>
+        <div class="psep reveal-item">→</div>
+        <div class="pnode reveal-item"><div class="pc">④ 自检产出</div><div class="pd">单文件 HTML</div></div>
+      </div>
+      <p class="lead reveal-item" style="text-align:center;margin-top:1.6rem;max-width:none;">对 AI 说一句<strong>"用 coslides 做一份关于 X 的演示"</strong>即可。</p>
     </div>
   </section>
 
@@ -370,16 +484,16 @@
   <section class="slide closing">
     <div class="kicker" style="justify-content:center;">小结</div>
     <h1>内容你来写，<br><span class="accent">体验框架包办</span></h1>
-    <div class="sub">复制模板 · 填 #deck · 双击打开。<br>想做下一份？对 AI 说"用 coslides 做一份关于 X 的演示"。</div>
+    <div class="sub">单文件 · 零依赖 · 暗色风 · 全套导航 · 分步交互 · 章节主题色。<br>复制模板、填 #deck、双击打开。</div>
   </section>
 
 </div>
 <!-- ↑↑↑ 只编辑上面的 #deck 区域 ↑↑↑ -->
 
-<div class="nav-hint">点击 / <kbd>→</kbd> 下一页 · <kbd>←</kbd> 上一页 · <kbd>1-9</kbd> 跳章 · <kbd>O</kbd> 概览 · <kbd>F</kbd> 全屏</div>
+<div class="nav-hint">点击 / <kbd>空格</kbd> 推进 · <kbd>→</kbd> 下一页 · <kbd>←</kbd> 上一页 · <kbd>1-9</kbd> 跳章 · <kbd>Esc</kbd> 概览 · <kbd>F</kbd> 全屏</div>
 <div id="chrome">
   <!-- 改这里：品牌名 -->
-  <div id="brand"><span class="dot"></span> <span id="brandname">coslides · 框架演示</span> <span id="chapname"></span></div>
+  <div id="brand"><span class="dot"></span> <span id="brandname">coslides · 能力全展示</span> <span id="chapname"></span></div>
   <div id="dots"></div>
   <div id="counter"><b id="cur">1</b> / <span id="total">1</span></div>
 </div>
@@ -399,13 +513,13 @@
   totalEl.textContent = slides.length;
 
   // ── 章节索引：按 data-chapter 分组 ──
-  // chapters: [{num, title, start}] ；chapterStarts 用于数字键跳章。
+  // chapters: [{num, title, start, color}] ；用于数字键跳章 / 章名 / 章节主题色。
   const chapters = [];
   slides.forEach((s, i) => {
     const c = s.dataset.chapter;
     if (!c) return;
     if (!chapters.find(x => x.num === c)) {
-      chapters.push({ num: c, title: s.dataset.chapterTitle || ('第 ' + c + ' 章'), start: i });
+      chapters.push({ num: c, title: s.dataset.chapterTitle || ('第 ' + c + ' 章'), start: i, color: s.dataset.chapterColor || null });
     }
   });
 
@@ -484,6 +598,47 @@
     chapEl.textContent = meta ? ('· ' + meta.title) : '';
   }
 
+  // ── 章节主题色：进入某章时把该章颜色写入全局 --accent ──
+  // 高亮元素 / 进度条 / 高亮圆点都引用 --accent，会整体跟随变色；无章节页回落默认色。
+  const rootStyle = document.documentElement.style;
+  const defaultAccent = (getComputedStyle(document.documentElement).getPropertyValue('--accent') || '#38e0d0').trim();
+  function hexToRgb(hex) {
+    const m = /^#?([0-9a-f]{2})([0-9a-f]{2})([0-9a-f]{2})$/i.exec((hex || '').trim());
+    return m ? [parseInt(m[1], 16), parseInt(m[2], 16), parseInt(m[3], 16)] : [56, 224, 208];
+  }
+  let accentRGB = hexToRgb(defaultAccent);   // 背景粒子读取它 → 跟随章节主题色
+  function applyTheme() {
+    const ch = slides[idx].dataset.chapter;
+    const meta = ch && chapters.find(x => x.num === ch);
+    const color = (meta && meta.color) || defaultAccent;
+    rootStyle.setProperty('--accent', color);
+    accentRGB = hexToRgb(color);
+  }
+
+  // ── 分步（steps）：空格 / 点击在页内逐步推进，推完再翻页（Keynote builds）──
+  // 步数 = data-steps="N"，否则数页内 .step 元素个数。推进时：给第 N 个 .step 加
+  // .shown、在 section 写 data-step="N"、派发 coslides:step 事件（detail:{step,total,dir}）。
+  let curStep = 0, curTotal = 0;
+  function slideTotal(s) {
+    if (s.dataset.steps != null) return parseInt(s.dataset.steps, 10) || 0;
+    return s.querySelectorAll('.step').length;
+  }
+  function applyStepState(s, fire, dir) {
+    s.dataset.step = curStep;
+    s.querySelectorAll('.step').forEach((el, i) => el.classList.toggle('shown', i < curStep));
+    if (fire && curTotal > 0) s.dispatchEvent(new CustomEvent('coslides:step', { detail: { step: curStep, total: curTotal, dir: dir || 0 } }));
+  }
+  function initSteps(dir) {
+    const s = slides[idx];
+    curTotal = slideTotal(s);
+    curStep = dir < 0 ? curTotal : 0;   // 反向进入 → 全部展开；正向 / 跳转 → 从第 0 步
+    applyStepState(s, curTotal > 0, 0);
+  }
+  function advance() {
+    if (curStep < curTotal) { curStep++; applyStepState(slides[idx], true, 1); }
+    else next();
+  }
+
   let suppressHash = false;
   function go(n) {
     const from = idx;
@@ -495,6 +650,8 @@
     curEl.textContent = idx + 1;
     progress.style.width = ((idx + 1) / slides.length * 100) + '%';
     updateChapName();
+    applyTheme();
+    initSteps(dir);
     runReveal(slides[idx], dir);
     if (dir !== 0 && window.__kickBg) window.__kickBg(dir);
     const want = 'p' + (idx + 1);
@@ -516,7 +673,8 @@
       if (e.key === 'Escape' || e.key === 'o' || e.key === 'O') { e.preventDefault(); closeOverview(); }
       return;
     }
-    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); next(); }
+    if (e.key === ' ') { e.preventDefault(); advance(); }
+    else if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); next(); }
     else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prev(); }
     else if (e.key === 'Home') go(0);
     else if (e.key === 'End') go(slides.length - 1);
@@ -529,7 +687,7 @@
     if (e.target.closest('.bubble.human')) return;   // 揭示答案，不翻页
     if (e.target.closest('a')) return;               // 让链接正常打开
     if (e.clientY > window.innerHeight - 70) return; // 底部 chrome 区
-    next();
+    advance();                                       // 有步骤先推进，推完再翻页
   });
   let tx = 0;
   document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
@@ -541,6 +699,7 @@
     const canvas = document.getElementById('bg'), ctx = canvas.getContext('2d');
     let w, h, pts, raf, running = true; const COUNT = 52, LINK = 150;
     let boost = 0, dir = 0;
+    let curRGB = accentRGB.slice();   // 当前粒子色，每帧平滑趋近 accentRGB
     window.__kickBg = (d) => {
       dir = d; boost = 1;
       for (const p of pts) { p.vx += dir * (0.7 + Math.random() * 0.9) * devicePixelRatio; p.vy += (Math.random() - .5) * 1.0 * devicePixelRatio; }
@@ -550,6 +709,8 @@
     function frame() {
       if (!running) return; ctx.clearRect(0, 0, w, h); const link = LINK * devicePixelRatio;
       const sweep = dir * boost * 3.2 * devicePixelRatio;
+      for (let k = 0; k < 3; k++) curRGB[k] += (accentRGB[k] - curRGB[k]) * 0.08;
+      const cr = curRGB[0] | 0, cg = curRGB[1] | 0, cb = curRGB[2] | 0;
       for (let i = 0; i < pts.length; i++) {
         const p = pts[i];
         p.x += p.vx + sweep; p.y += p.vy;
@@ -557,9 +718,9 @@
         if (p.y < 0) p.y += h; else if (p.y > h) p.y -= h;
         p.vx += ((Math.sign(p.vx) || 1) * 0.22 * devicePixelRatio - p.vx) * 0.04;
         p.vy += ((Math.sign(p.vy) || 1) * 0.22 * devicePixelRatio - p.vy) * 0.04;
-        for (let j = i + 1; j < pts.length; j++) { const q = pts[j], dx = p.x - q.x, dy = p.y - q.y, d = Math.hypot(dx, dy); if (d < link) { ctx.strokeStyle = 'rgba(56,224,208,' + (1 - d / link) * (.15 + boost * .35) + ')'; ctx.lineWidth = devicePixelRatio * (.6 + boost * .5); ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke(); } }
+        for (let j = i + 1; j < pts.length; j++) { const q = pts[j], dx = p.x - q.x, dy = p.y - q.y, d = Math.hypot(dx, dy); if (d < link) { ctx.strokeStyle = 'rgba(' + cr + ',' + cg + ',' + cb + ',' + (1 - d / link) * (.15 + boost * .35) + ')'; ctx.lineWidth = devicePixelRatio * (.6 + boost * .5); ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke(); } }
       }
-      for (const p of pts) { ctx.fillStyle = 'rgba(96,165,250,' + (.5 + boost * .4) + ')'; ctx.beginPath(); ctx.arc(p.x, p.y, p.r * (1 + boost * .6), 0, Math.PI * 2); ctx.fill(); }
+      for (const p of pts) { ctx.fillStyle = 'rgba(' + cr + ',' + cg + ',' + cb + ',' + (.5 + boost * .4) + ')'; ctx.beginPath(); ctx.arc(p.x, p.y, p.r * (1 + boost * .6), 0, Math.PI * 2); ctx.fill(); }
       boost *= 0.90; if (boost < 0.01) boost = 0;
       raf = requestAnimationFrame(frame);
     }

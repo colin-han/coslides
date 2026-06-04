@@ -187,6 +187,11 @@
   .slide.active .reveal-item.in{opacity:1;transform:none;filter:none;}
   @media (prefers-reduced-motion:reduce){.reveal-item{transition:none;opacity:1;transform:none;filter:none;}#brand .dot{animation:none;}}
 
+  /* ── step 分步：默认隐藏，框架推进时给第 N 个加 .shown ── */
+  .step{opacity:0;transform:translateY(18px);filter:blur(2px);transition:opacity .45s cubic-bezier(.2,.7,.2,1),transform .45s cubic-bezier(.2,.7,.2,1),filter .45s ease;}
+  .step.shown{opacity:1;transform:none;filter:none;}
+  @media (prefers-reduced-motion:reduce){.step{transition:none;}}
+
   /* ── overview 缩略概览 (新增) ── */
   #overview{position:fixed;inset:0;z-index:30;background:rgba(8,12,24,.96);backdrop-filter:blur(6px);display:none;flex-direction:column;padding:4vh 5vw;overflow-y:auto;}
   #overview.show{display:flex;}
@@ -211,7 +216,9 @@
      · 章节用 data-chapter="N"，章首页（chapter 页）再加 data-chapter-title="…"。
        可选 data-chapter-color="#rrggbb" 给该章一个主题色（高亮/进度条/圆点随之变色）。
      · 封面 / 议程 / 收尾不属于任何章，不写 data-chapter。
-     · 需要逐项入场的元素加 class="reveal-item"。
+     · 需要逐项入场的元素加 class="reveal-item"（进页自动错峰浮现）。
+     · 需要空格逐步推进的元素加 class="step"（默认隐藏，每按空格揭示一个）；
+       复杂交互见 COMPONENTS.md「交互与分步」：data-steps / coslides:step 事件。
      ════════════════════════════════════════════════════════════════════ -->
 <div id="deck">
 
@@ -249,10 +256,11 @@
     <div class="kicker"><span class="ch">01 ·</span> 一个内容页示例</div>
     <h2>用卡片<span class="accent">并列三点</span></h2>
     <div class="grow">
+      <!-- 这三张卡用 class="step"：每按一次空格揭示一张（推完再翻页） -->
       <div class="cards c3">
-        <div class="card reveal-item"><div class="top"></div><div class="tag">TAG</div><h3>要点一</h3><p>说明文字。</p></div>
-        <div class="card b-emerald reveal-item"><div class="top"></div><div class="tag">TAG</div><h3>要点二</h3><p>说明文字。</p></div>
-        <div class="card b-violet reveal-item"><div class="top"></div><div class="tag">TAG</div><h3>要点三</h3><p>说明文字。</p></div>
+        <div class="card step"><div class="top"></div><div class="tag">TAG</div><h3>要点一</h3><p>说明文字。</p></div>
+        <div class="card b-emerald step"><div class="top"></div><div class="tag">TAG</div><h3>要点二</h3><p>说明文字。</p></div>
+        <div class="card b-violet step"><div class="top"></div><div class="tag">TAG</div><h3>要点三</h3><p>说明文字。</p></div>
       </div>
     </div>
   </section>
@@ -286,7 +294,7 @@
 </div>
 <!-- ↑↑↑ 只编辑上面的 #deck 区域 ↑↑↑ -->
 
-<div class="nav-hint">点击 / <kbd>→</kbd> 下一页 · <kbd>←</kbd> 上一页 · <kbd>1-9</kbd> 跳章 · <kbd>Esc</kbd> 概览 · <kbd>F</kbd> 全屏</div>
+<div class="nav-hint">点击 / <kbd>空格</kbd> 推进 · <kbd>→</kbd> 下一页 · <kbd>←</kbd> 上一页 · <kbd>1-9</kbd> 跳章 · <kbd>Esc</kbd> 概览 · <kbd>F</kbd> 全屏</div>
 <div id="chrome">
   <!-- 改这里：品牌名 -->
   <div id="brand"><span class="dot"></span> <span id="brandname">coslides</span> <span id="chapname"></span></div>
@@ -411,6 +419,30 @@
     accentRGB = hexToRgb(color);
   }
 
+  // ── 分步（steps）：空格 / 点击在页内逐步推进，推完再翻页（Keynote builds）──
+  // 步数 = data-steps="N"，否则数页内 .step 元素个数。推进时：给第 N 个 .step 加
+  // .shown、在 section 写 data-step="N"、派发 coslides:step 事件（detail:{step,total,dir}）。
+  let curStep = 0, curTotal = 0;
+  function slideTotal(s) {
+    if (s.dataset.steps != null) return parseInt(s.dataset.steps, 10) || 0;
+    return s.querySelectorAll('.step').length;
+  }
+  function applyStepState(s, fire, dir) {
+    s.dataset.step = curStep;
+    s.querySelectorAll('.step').forEach((el, i) => el.classList.toggle('shown', i < curStep));
+    if (fire && curTotal > 0) s.dispatchEvent(new CustomEvent('coslides:step', { detail: { step: curStep, total: curTotal, dir: dir || 0 } }));
+  }
+  function initSteps(dir) {
+    const s = slides[idx];
+    curTotal = slideTotal(s);
+    curStep = dir < 0 ? curTotal : 0;   // 反向进入 → 全部展开；正向 / 跳转 → 从第 0 步
+    applyStepState(s, curTotal > 0, 0);
+  }
+  function advance() {
+    if (curStep < curTotal) { curStep++; applyStepState(slides[idx], true, 1); }
+    else next();
+  }
+
   let suppressHash = false;
   function go(n) {
     const from = idx;
@@ -423,6 +455,7 @@
     progress.style.width = ((idx + 1) / slides.length * 100) + '%';
     updateChapName();
     applyTheme();
+    initSteps(dir);
     runReveal(slides[idx], dir);
     if (dir !== 0 && window.__kickBg) window.__kickBg(dir);
     const want = 'p' + (idx + 1);
@@ -444,7 +477,8 @@
       if (e.key === 'Escape' || e.key === 'o' || e.key === 'O') { e.preventDefault(); closeOverview(); }
       return;
     }
-    if (e.key === 'ArrowRight' || e.key === 'PageDown' || e.key === ' ') { e.preventDefault(); next(); }
+    if (e.key === ' ') { e.preventDefault(); advance(); }
+    else if (e.key === 'ArrowRight' || e.key === 'PageDown') { e.preventDefault(); next(); }
     else if (e.key === 'ArrowLeft' || e.key === 'PageUp') { e.preventDefault(); prev(); }
     else if (e.key === 'Home') go(0);
     else if (e.key === 'End') go(slides.length - 1);
@@ -457,7 +491,7 @@
     if (e.target.closest('.bubble.human')) return;   // 揭示答案，不翻页
     if (e.target.closest('a')) return;               // 让链接正常打开
     if (e.clientY > window.innerHeight - 70) return; // 底部 chrome 区
-    next();
+    advance();                                       // 有步骤先推进，推完再翻页
   });
   let tx = 0;
   document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
