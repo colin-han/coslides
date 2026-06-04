@@ -209,6 +209,7 @@
   #cm-json .cm-jbar{display:flex;gap:1rem;align-items:center;margin-top:1rem;}
   #cm-json .cm-jbtn{font-family:var(--mono);font-size:.8rem;padding:.5rem 1.3rem;border-radius:8px;border:1px solid var(--accent);color:var(--accent);background:rgba(56,224,208,.07);cursor:pointer;}
   #cm-json .cm-jerr{font-family:var(--mono);font-size:.78rem;color:var(--rose);}
+  #cm-json .cm-jclear{border-color:var(--rose);color:var(--rose);background:rgba(251,113,133,.07);margin-left:auto;}
 
   /* ── overview 缩略概览 (新增) ── */
   #overview{position:fixed;inset:0;z-index:30;background:rgba(8,12,24,.96);backdrop-filter:blur(6px);display:none;flex-direction:column;padding:4vh 5vw;overflow-y:auto;}
@@ -509,7 +510,7 @@
 </div>
 <!-- ↑↑↑ 只编辑上面的 #deck 区域 ↑↑↑ -->
 
-<div class="nav-hint">点击 / <kbd>空格</kbd> 推进 · <kbd>→</kbd> 下一页 · <kbd>←</kbd> 上一页 · <kbd>1-9</kbd> 跳章 · <kbd>Esc</kbd> 概览 · <kbd>F</kbd> 全屏</div>
+<div class="nav-hint">点击 / <kbd>空格</kbd> 推进 · <kbd>→</kbd> 下一页 · <kbd>←</kbd> 上一页 · <kbd>1-9</kbd> 跳章 · <kbd>Esc</kbd> 概览 · <kbd>C</kbd> 批注 · <kbd>J</kbd> 查看标注 · <kbd>F</kbd> 全屏</div>
 <div id="chrome">
   <!-- 改这里：品牌名 -->
   <div id="brand"><span class="dot"></span> <span id="brandname">coslides · 能力全展示</span> <span id="chapname"></span></div>
@@ -519,7 +520,7 @@
 <div id="overview"><div class="ov-title">概览 · <kbd>↑↓←→</kbd> 选择 · <kbd>Enter</kbd> 跳转 · 点击 / <kbd>Esc</kbd> 关闭</div><div id="ov-body"></div></div>
 <div id="comments-layer"></div>
 <div id="cm-banner">批注模式 · 点击页面任意处留言 · Enter / Esc 退出</div>
-<div id="cm-json"><div class="cm-jtitle">Comments JSON · 编辑或整段粘贴后点「应用」 · Esc 关闭</div><textarea id="cm-json-ta" spellcheck="false"></textarea><div class="cm-jbar"><span class="cm-jbtn" id="cm-json-apply">应用</span><span class="cm-jerr" id="cm-json-err"></span></div></div>
+<div id="cm-json"><div class="cm-jtitle">Comments JSON · 编辑或整段粘贴后点「应用」 · Esc 关闭</div><textarea id="cm-json-ta" spellcheck="false"></textarea><div class="cm-jbar"><span class="cm-jbtn" id="cm-json-apply">应用</span><span class="cm-jerr" id="cm-json-err"></span><span class="cm-jbtn cm-jclear" id="cm-json-clear">清除全部</span></div></div>
 
 <script>
   const slides = Array.from(document.querySelectorAll('.slide'));
@@ -694,7 +695,7 @@
     openInput(e.clientX / window.innerWidth, e.clientY / window.innerHeight);
   });
 
-  function openJson() { cmJsonTa.value = JSON.stringify(comments, null, 2); cmJsonErr.textContent = ''; cmJson.classList.add('show'); cmJsonTa.focus(); }
+  function openJson() { cmJsonTa.value = JSON.stringify(comments, null, 2); cmJsonErr.textContent = ''; cmJson.classList.add('show'); cmJsonTa.focus(); cmJsonTa.select(); }
   function closeJson() { cmJson.classList.remove('show'); }
   function applyJson() {
     try {
@@ -707,6 +708,7 @@
     } catch (err) { cmJsonErr.textContent = '解析失败：' + err.message; }
   }
   document.getElementById('cm-json-apply').addEventListener('click', applyJson);
+  document.getElementById('cm-json-clear').addEventListener('click', () => { comments = []; cmId = 0; renderMarkers(); closeJson(); });
   cmJson.addEventListener('click', (e) => { if (e.target === cmJson) closeJson(); });
 
   // ── reveal 入场 ──
