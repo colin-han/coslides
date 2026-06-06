@@ -56,7 +56,7 @@
   .cards{display:grid;gap:1.1rem;}
   .cards.c2{grid-template-columns:repeat(2,1fr);}
   .cards.c3{grid-template-columns:repeat(3,1fr);}
-  .card{background:linear-gradient(160deg,var(--panel),var(--bg-2));border:1px solid var(--line);border-radius:14px;padding:1.3rem 1.45rem;position:relative;overflow:hidden;transition:transform .25s,border-color .25s,box-shadow .25s;}
+  .card{background:linear-gradient(160deg,var(--panel),var(--bg-2));border:1px solid var(--line);border-radius:14px;padding:1.3rem 1.45rem;position:relative;overflow:hidden;will-change:transform;transition:transform .25s,border-color .25s,box-shadow .25s;}
   .card:hover{transform:translateY(-4px);border-color:rgba(56,224,208,.5);box-shadow:0 14px 40px -18px rgba(56,224,208,.5);}
   .card .top{position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent);}
   .card.b-emerald .top{background:var(--emerald);} .card.b-amber .top{background:var(--amber);}
@@ -183,12 +183,12 @@
   kbd{border:1px solid var(--line);border-radius:4px;padding:.05rem .4rem;color:var(--txt-dim);}
 
   /* ── reveal 逐项入场 ── */
-  .reveal-item{opacity:0;transform:translate(var(--enter-x,0px),var(--enter-y,20px));filter:blur(2px);transition:opacity .5s cubic-bezier(.2,.7,.2,1),transform .5s cubic-bezier(.2,.7,.2,1),filter .5s ease;}
+  .reveal-item{opacity:0;transform:translate(var(--enter-x,0px),var(--enter-y,20px));filter:blur(2px);will-change:transform,opacity,filter;transition:opacity .5s cubic-bezier(.2,.7,.2,1),transform .5s cubic-bezier(.2,.7,.2,1),filter .5s ease;}
   .slide.active .reveal-item.in{opacity:1;transform:none;filter:none;}
   @media (prefers-reduced-motion:reduce){.reveal-item{transition:none;opacity:1;transform:none;filter:none;}#brand .dot{animation:none;}}
 
   /* ── step 分步：默认隐藏，框架推进时给第 N 个加 .shown ── */
-  .step{opacity:0;transform:translateY(18px);filter:blur(2px);transition:opacity .45s cubic-bezier(.2,.7,.2,1),transform .45s cubic-bezier(.2,.7,.2,1),filter .45s ease;}
+  .step{opacity:0;transform:translateY(18px);filter:blur(2px);will-change:transform,opacity,filter;transition:opacity .45s cubic-bezier(.2,.7,.2,1),transform .45s cubic-bezier(.2,.7,.2,1),filter .45s ease;}
   .step.shown{opacity:1;transform:none;filter:none;}
   @media (prefers-reduced-motion:reduce){.step{transition:none;}}
 
@@ -538,13 +538,14 @@
   // ── 章节索引：按 data-chapter 分组 ──
   // chapters: [{num, title, start, color}] ；用于数字键跳章 / 章名 / 章节主题色。
   const chapters = [];
+  const chapterSet = new Set();
   slides.forEach((s, i) => {
     const c = s.dataset.chapter;
-    if (!c) return;
-    if (!chapters.find(x => x.num === c)) {
-      chapters.push({ num: c, title: s.dataset.chapterTitle || ('第 ' + c + ' 章'), start: i, color: s.dataset.chapterColor || null });
-    }
+    if (!c || chapterSet.has(c)) return;
+    chapterSet.add(c);
+    chapters.push({ num: c, title: s.dataset.chapterTitle || ('第 ' + c + ' 章'), start: i, color: s.dataset.chapterColor || null });
   });
+  const chapterMap = new Map(chapters.map(c => [c.num, c]));
 
   // ── 底部圆点：按章分组（章与章之间插入间隙）──
   const dots = [];
@@ -564,11 +565,16 @@
   });
 
   // ── 概览缩略网格：按章分区 ──
-  function slideTitle(s) {
+  const slideTitles = slides.map(s => {
     const el = s.querySelector('h1, h2, .chap-tag, .kicker');
     return el ? el.textContent.trim().replace(/\s+/g, ' ').slice(0, 48) : '(无标题)';
-  }
+  });
+  let overviewBuilt = false;
   function buildOverview() {
+    if (overviewBuilt) {
+      ovBody.querySelectorAll('.ov-cell').forEach((el, i) => el.classList.toggle('cur', i === idx));
+      return;
+    }
     ovBody.innerHTML = '';
     let group = null, groupChapter = '__none__';
     slides.forEach((s, i) => {
@@ -579,7 +585,7 @@
         group.className = 'ov-chapter';
         const name = document.createElement('div');
         name.className = 'ov-ch-name';
-        const meta = chapters.find(x => x.num === ch);
+        const meta = chapterMap.get(ch);
         name.textContent = ch ? (meta ? meta.title : ('第 ' + ch + ' 章')) : '— 前言 / 尾声 —';
         group.appendChild(name);
         const grid = document.createElement('div');
@@ -590,11 +596,18 @@
       const grid = group.querySelector('.ov-grid');
       const cell = document.createElement('div');
       cell.className = 'ov-cell' + (i === idx ? ' cur' : '');
-      cell.innerHTML = '<div class="ov-n">' + (i + 1) + '</div><div class="ov-t">' + slideTitle(s) + '</div>';
-      cell.addEventListener('click', () => { closeOverview(); go(i); });
+      cell.dataset.idx = i;
+      cell.innerHTML = '<div class="ov-n">' + (i + 1) + '</div><div class="ov-t">' + slideTitles[i] + '</div>';
       grid.appendChild(cell);
     });
+    overviewBuilt = true;
   }
+  // 概览事件委托：在 ovBody 上统一处理点击
+  ovBody.addEventListener('click', (e) => {
+    const cell = e.target.closest('.ov-cell');
+    if (!cell) return;
+    closeOverview(); go(+cell.dataset.idx);
+  });
   let ovSel = 0;
   function ovCells() { return Array.from(ovBody.querySelectorAll('.ov-cell')); }
   function updateOvSel() {
@@ -605,20 +618,22 @@
   function moveOvSel(dx, dy) {
     const cells = ovCells();
     if (!cells.length) return;
-    const cr = (cells[ovSel] || cells[0]).getBoundingClientRect();
+    const rects = cells.map(el => el.getBoundingClientRect());
+    const ci = Math.min(ovSel, rects.length - 1);
+    const cr = rects[ci] || rects[0];
     const ccx = cr.left + cr.width / 2, ccy = cr.top + cr.height / 2;
     let best = -1, bestScore = Infinity;
-    cells.forEach((el, i) => {
-      if (i === ovSel) return;
-      const r = el.getBoundingClientRect();
+    for (let i = 0; i < cells.length; i++) {
+      if (i === ci) continue;
+      const r = rects[i];
       const ex = (r.left + r.width / 2) - ccx, ey = (r.top + r.height / 2) - ccy;
-      if (dx === 1 && ex <= 4) return;
-      if (dx === -1 && ex >= -4) return;
-      if (dy === 1 && ey <= 4) return;
-      if (dy === -1 && ey >= -4) return;
+      if (dx === 1 && ex <= 4) continue;
+      if (dx === -1 && ex >= -4) continue;
+      if (dy === 1 && ey <= 4) continue;
+      if (dy === -1 && ey >= -4) continue;
       const score = dx !== 0 ? Math.abs(ex) + Math.abs(ey) * 3 : Math.abs(ey) + Math.abs(ex) * 3;
       if (score < bestScore) { bestScore = score; best = i; }
-    });
+    }
     if (best >= 0) { ovSel = best; updateOvSel(); }
   }
   function openOverview() { ovSel = idx; buildOverview(); overview.classList.add('show'); updateOvSel(); if (window.__pauseBg) __pauseBg(); }
@@ -729,7 +744,7 @@
   // ── 当前章名 ──
   function updateChapName() {
     const ch = slides[idx].dataset.chapter;
-    const meta = ch && chapters.find(x => x.num === ch);
+    const meta = ch && chapterMap.get(ch);
     chapEl.textContent = meta ? ('· ' + meta.title) : '';
   }
 
@@ -744,7 +759,7 @@
   let accentRGB = hexToRgb(defaultAccent);   // 背景粒子读取它 → 跟随章节主题色
   function applyTheme() {
     const ch = slides[idx].dataset.chapter;
-    const meta = ch && chapters.find(x => x.num === ch);
+    const meta = ch && chapterMap.get(ch);
     const color = (meta && meta.color) || defaultAccent;
     rootStyle.setProperty('--accent', color);
     accentRGB = hexToRgb(color);
@@ -780,7 +795,8 @@
     idx = Math.max(0, Math.min(slides.length - 1, n));
     const dir = idx === from ? 0 : (idx > from ? 1 : -1);
     clearT();
-    slides.forEach((s, i) => s.classList.toggle('active', i === idx));
+    if (from >= 0 && from < slides.length) slides[from].classList.remove('active');
+    slides[idx].classList.add('active');
     dots.forEach((d, i) => d.classList.toggle('on', i === idx));
     curEl.textContent = idx + 1;
     progress.style.width = ((idx + 1) / slides.length * 100) + '%';
@@ -859,11 +875,20 @@
     window.__resumeBg = () => { if (!running && !document.hidden) { running = true; frame(); } };
     function resize() { w = canvas.width = innerWidth * devicePixelRatio; h = canvas.height = innerHeight * devicePixelRatio; canvas.style.width = innerWidth + 'px'; canvas.style.height = innerHeight + 'px'; }
     function init() { pts = Array.from({ length: COUNT }, () => ({ x: Math.random() * w, y: Math.random() * h, vx: (Math.random() - .5) * .22 * devicePixelRatio, vy: (Math.random() - .5) * .22 * devicePixelRatio, r: (Math.random() * 1.5 + .5) * devicePixelRatio })); }
-    function frame() {
-      if (!running) return; ctx.clearRect(0, 0, w, h); const link = LINK * devicePixelRatio;
+    const FPS_INTERVAL = 1000 / 30;   // 限制 30fps
+    let lastFrame = 0;
+    function frame(ts) {
+      if (!running) return;
+      raf = requestAnimationFrame(frame);
+      if (!ts || ts - lastFrame < FPS_INTERVAL) return;
+      lastFrame = ts;
+      ctx.clearRect(0, 0, w, h); const link = LINK * devicePixelRatio;
       const sweep = dir * boost * 3.2 * devicePixelRatio;
       for (let k = 0; k < 3; k++) curRGB[k] += (accentRGB[k] - curRGB[k]) * 0.08;
       const cr = curRGB[0] | 0, cg = curRGB[1] | 0, cb = curRGB[2] | 0;
+      // 按透明度分桶批量绘制连线（减少 stroke 调用）
+      const BUCKETS = 5;
+      const bucketLines = Array.from({ length: BUCKETS }, () => []);
       for (let i = 0; i < pts.length; i++) {
         const p = pts[i];
         p.x += p.vx + sweep; p.y += p.vy;
@@ -871,11 +896,30 @@
         if (p.y < 0) p.y += h; else if (p.y > h) p.y -= h;
         p.vx += ((Math.sign(p.vx) || 1) * 0.22 * devicePixelRatio - p.vx) * 0.04;
         p.vy += ((Math.sign(p.vy) || 1) * 0.22 * devicePixelRatio - p.vy) * 0.04;
-        for (let j = i + 1; j < pts.length; j++) { const q = pts[j], dx = p.x - q.x, dy = p.y - q.y, d = Math.hypot(dx, dy); if (d < link) { ctx.strokeStyle = 'rgba(' + cr + ',' + cg + ',' + cb + ',' + (1 - d / link) * (.15 + boost * .35) + ')'; ctx.lineWidth = devicePixelRatio * (.6 + boost * .5); ctx.beginPath(); ctx.moveTo(p.x, p.y); ctx.lineTo(q.x, q.y); ctx.stroke(); } }
+        for (let j = i + 1; j < pts.length; j++) {
+          const q = pts[j], dx = p.x - q.x, dy = p.y - q.y, d = Math.hypot(dx, dy);
+          if (d < link) {
+            const alpha = (1 - d / link) * (.15 + boost * .35);
+            const bi = Math.min(BUCKETS - 1, (alpha * BUCKETS) | 0);
+            bucketLines[bi].push(p.x, p.y, q.x, q.y);
+          }
+        }
+      }
+      ctx.lineWidth = devicePixelRatio * (.6 + boost * .5);
+      for (let bi = 0; bi < BUCKETS; bi++) {
+        const lines = bucketLines[bi];
+        if (!lines.length) continue;
+        const a = ((bi + 0.5) / BUCKETS).toFixed(3);
+        ctx.strokeStyle = 'rgba(' + cr + ',' + cg + ',' + cb + ',' + a + ')';
+        ctx.beginPath();
+        for (let k = 0; k < lines.length; k += 4) {
+          ctx.moveTo(lines[k], lines[k + 1]);
+          ctx.lineTo(lines[k + 2], lines[k + 3]);
+        }
+        ctx.stroke();
       }
       for (const p of pts) { ctx.fillStyle = 'rgba(' + cr + ',' + cg + ',' + cb + ',' + (.5 + boost * .4) + ')'; ctx.beginPath(); ctx.arc(p.x, p.y, p.r * (1 + boost * .6), 0, Math.PI * 2); ctx.fill(); }
       boost *= 0.90; if (boost < 0.01) boost = 0;
-      raf = requestAnimationFrame(frame);
     }
     resize(); init(); frame();
     addEventListener('resize', () => { resize(); init(); });
