@@ -621,8 +621,8 @@
     });
     if (best >= 0) { ovSel = best; updateOvSel(); }
   }
-  function openOverview() { ovSel = idx; buildOverview(); overview.classList.add('show'); updateOvSel(); }
-  function closeOverview() { overview.classList.remove('show'); }
+  function openOverview() { ovSel = idx; buildOverview(); overview.classList.add('show'); updateOvSel(); if (window.__pauseBg) __pauseBg(); }
+  function closeOverview() { overview.classList.remove('show'); if (window.__resumeBg) __resumeBg(); }
   function toggleOverview() { overview.classList.contains('show') ? closeOverview() : openOverview(); }
 
   // ── comments 批注（评审工具）：C 进入批注、J 看/编 JSON。仅存内存，靠 JSON 导入导出 ──
@@ -855,6 +855,8 @@
       dir = d; boost = 1;
       for (const p of pts) { p.vx += dir * (0.7 + Math.random() * 0.9) * devicePixelRatio; p.vy += (Math.random() - .5) * 1.0 * devicePixelRatio; }
     };
+    window.__pauseBg = () => { running = false; cancelAnimationFrame(raf); };
+    window.__resumeBg = () => { if (!running && !document.hidden) { running = true; frame(); } };
     function resize() { w = canvas.width = innerWidth * devicePixelRatio; h = canvas.height = innerHeight * devicePixelRatio; canvas.style.width = innerWidth + 'px'; canvas.style.height = innerHeight + 'px'; }
     function init() { pts = Array.from({ length: COUNT }, () => ({ x: Math.random() * w, y: Math.random() * h, vx: (Math.random() - .5) * .22 * devicePixelRatio, vy: (Math.random() - .5) * .22 * devicePixelRatio, r: (Math.random() * 1.5 + .5) * devicePixelRatio })); }
     function frame() {
