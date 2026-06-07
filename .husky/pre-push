@@ -1,0 +1,6 @@
+node build.js
+# 如果构建产物有更新，自动提交
+if ! git diff --quiet assets/coslides-core.html; then
+  git add assets/coslides-core.html
+  git commit -m "chore: update coslides-core.html [auto-build]"
+fi

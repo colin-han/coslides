@@ -1,0 +1,15 @@
+/* ── flow 决策流程图 ── */
+.flow-node{font-family:var(--mono);font-size:1rem;padding:.8rem 1.5rem;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--txt);}
+.flow-node code{color:var(--accent);}
+.flow-arr{color:var(--txt-faint);font-family:var(--mono);font-size:.9rem;letter-spacing:.12em;}
+.flow-decide{text-align:center;padding:.95rem 1.8rem;border:1.5px solid rgba(251,191,36,.5);border-radius:12px;background:rgba(251,191,36,.06);font-size:1.15rem;font-weight:650;color:var(--amber);}
+.flow-decide .sub2{font-size:.82rem;font-weight:400;color:var(--txt-dim);margin-top:.3rem;}
+.flow-branch{flex:1;border:1px solid var(--line);border-radius:12px;padding:1rem 1.2rem;background:var(--panel);}
+.flow-branch .bl{font-family:var(--mono);font-size:.8rem;letter-spacing:.06em;margin-bottom:.35rem;}
+.flow-branch .bt{font-weight:680;font-size:1.05rem;margin-bottom:.35rem;color:var(--txt);}
+.flow-branch .bd{font-size:.86rem;color:var(--txt-dim);line-height:1.5;}
+.flow-branch.warn{border-color:rgba(251,191,36,.45);} .flow-branch.warn .bl{color:var(--amber);}
+.flow-branch.ok{border-color:rgba(74,222,128,.45);} .flow-branch.ok .bl{color:var(--emerald);}
+.flow-out{flex:1;text-align:center;font-weight:680;font-size:1.15rem;padding:.9rem;border-radius:12px;border:1.5px solid;}
+.flow-out.a{color:var(--accent);border-color:var(--accent);background:rgba(56,224,208,.07);}
+.flow-out.b{color:var(--violet);border-color:var(--violet);background:rgba(167,139,250,.07);}

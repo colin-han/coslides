@@ -8,3 +8,5 @@ docs/
 # 本地预览文件：用真实演示验证模板效果，不入库
 references/harness-overview.html
 references/feedback-loop.html
+docs/superpowers/
+.superpowers/

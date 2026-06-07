@@ -1,0 +1,39 @@
+/* ── 基础：变量、重置、排版 ── */
+:root {
+  /* ═══ coslides 配置区：改这几行就能换主色/风格 ═══ */
+  --accent:   #38e0d0;   /* 主强调色：眉标 / 进度条 / 高亮 / 品牌点 */
+  --accent-2: #4ade80;   /* 次强调色：成功 / 强调 */
+  --bg:       #0b1020;   /* 背景底色 */
+  /* ═══ 以下为派生色 / 字体栈，一般无需改动 ═══ */
+  --bg-2:#0f1629; --panel:#151d33; --panel-2:#1b2540; --line:#283452;
+  --txt:#e6edf7; --txt-dim:#9fb0cc; --txt-faint:#5f6f8f;
+  --cyan:var(--accent); --emerald:var(--accent-2);
+  --amber:#fbbf24; --violet:#a78bfa; --rose:#fb7185; --blue:#60a5fa;
+  --mono:"SF Mono","JetBrains Mono","Fira Code",Menlo,Consolas,monospace;
+  --sans:-apple-system,BlinkMacSystemFont,"Segoe UI","PingFang SC","Microsoft YaHei",sans-serif;
+}
+*{margin:0;padding:0;box-sizing:border-box;}
+html,body{height:100%;background:var(--bg);color:var(--txt);font-family:var(--sans);overflow:hidden;-webkit-font-smoothing:antialiased;}
+body::before{content:"";position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(56,224,208,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(56,224,208,.035) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;}
+body::after{content:"";position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(96,165,250,.10),transparent 60%);pointer-events:none;}
+#bg{position:fixed;inset:0;z-index:0;pointer-events:none;}
+#deck{position:relative;height:100%;width:100%;z-index:1;}
+
+/* ── 文本 ── */
+.kicker{font-family:var(--mono);font-size:.8rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:.8rem;display:flex;align-items:center;gap:.6rem;}
+.kicker::before{content:"";width:26px;height:2px;background:var(--accent);display:inline-block;}
+.kicker .ch{color:var(--txt-faint);}
+h1{font-size:3.4rem;line-height:1.08;font-weight:750;letter-spacing:-.01em;}
+h2{font-size:2.1rem;line-height:1.15;font-weight:700;letter-spacing:-.01em;margin-bottom:1.4rem;}
+h2 .accent,.accent{color:var(--accent);}
+.sub{color:var(--txt-dim);font-size:1.15rem;line-height:1.6;max-width:62ch;}
+.lead{font-size:1.25rem;color:var(--txt-dim);line-height:1.7;max-width:72ch;}
+.lead strong{color:var(--txt);font-weight:650;}
+.grow{flex:1;display:flex;flex-direction:column;justify-content:center;min-height:0;}
+.hl{color:var(--amber);font-weight:600;}
+.ref{font-family:var(--mono);font-size:.9em;color:var(--violet);}
+code{font-family:var(--mono);color:var(--accent);}
+
+.footnote{font-family:var(--mono);font-size:.74rem;color:var(--txt-faint);margin-top:1.2rem;}
+.nb{white-space:nowrap;}
+.card p,.lead{line-break:strict;}

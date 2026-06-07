@@ -1,0 +1,4 @@
+/* ── tree 目录树 ── */
+.tree{font-family:var(--mono);font-size:.92rem;line-height:1.8;color:var(--txt-dim);background:#080c18;border:1px solid var(--line);border-radius:12px;padding:1.4rem 1.7rem;max-width:1100px;white-space:pre;overflow-x:auto;}
+.tree .d{color:var(--accent);} .tree .hl{color:var(--emerald);} .tree .cm{color:var(--txt-faint);} .tree .pl{color:var(--violet);}
+.tree b{color:var(--txt);font-weight:600;}

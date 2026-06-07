@@ -1,0 +1,13 @@
+{
+  "name": "coslides",
+  "version": "1.0.0",
+  "description": "单文件 HTML 演示框架",
+  "private": true,
+  "scripts": {
+    "build": "node build.js",
+    "prepare": "husky"
+  },
+  "devDependencies": {
+    "husky": "^9.1.7"
+  }
+}

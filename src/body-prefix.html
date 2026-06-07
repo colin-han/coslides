@@ -1,0 +1,89 @@
+</style>
+</head>
+<body>
+<canvas id="bg"></canvas>
+<div id="progress"></div>
+
+<!-- ════════════════════════════════════════════════════════════════════
+     ↓↓↓ 只编辑这个 #deck 区域 ↓↓↓
+     · 每页一个 <section class="slide">；首页加 active。
+     · 章节用 data-chapter="N"，章首页（chapter 页）再加 data-chapter-title="…"。
+       可选 data-chapter-color="#rrggbb" 给该章一个主题色（高亮/进度条/圆点随之变色）。
+     · 封面 / 议程 / 收尾不属于任何章，不写 data-chapter。
+     · 需要逐项入场的元素加 class="reveal-item"（进页自动错峰浮现）。
+     · 需要空格逐步推进的元素加 class="step"（默认隐藏，每按空格揭示一个）；
+       复杂交互见 references/COMPONENTS.md「交互与分步」：data-steps / coslides:step 事件。
+     ════════════════════════════════════════════════════════════════════ -->
+<div id="deck">
+
+  <!-- 封面 -->
+  <section class="slide title-slide active">
+    <div class="kicker">副标题 · KICKER</div>
+    <h1>演示标题写在这里</h1>
+    <div class="sub">一句话说明这份演示讲什么、为谁而讲。<br>可以用 <span class="accent">强调色</span> 点出重点。</div>
+    <div class="title-meta">
+      <div>范围 · <b>章节一览</b></div>
+      <div>状态 · <b>草稿</b></div>
+    </div>
+  </section>
+
+  <!-- 议程 -->
+  <section class="slide">
+    <div class="kicker">本场议程</div>
+    <h2>两个部分，<span class="accent">从结构到细节</span></h2>
+    <div class="grow">
+      <div class="agenda">
+        <div class="ag-item reveal-item"><div class="n">1</div><div><div class="t">第一章标题</div><div class="d">一句话描述</div></div></div>
+        <div class="ag-item reveal-item"><div class="n">2</div><div><div class="t">第二章标题</div><div class="d">一句话描述</div></div></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 第 1 章 ── -->
+  <section class="slide chapter" data-chapter="1" data-chapter-title="第一章" data-chapter-color="#38e0d0">
+    <div class="chap-tag">PART · 01</div>
+    <h1>第一章标题</h1>
+    <div class="chap-sub">这一章讲什么的<strong>一句话引子</strong>。</div>
+  </section>
+
+  <section class="slide" data-chapter="1">
+    <div class="kicker"><span class="ch">01 ·</span> 一个内容页示例</div>
+    <h2>用卡片<span class="accent">并列三点</span></h2>
+    <div class="grow">
+      <!-- 这三张卡用 class="step"：每按一次空格揭示一张（推完再翻页） -->
+      <div class="cards c3">
+        <div class="card step"><div class="top"></div><div class="tag">TAG</div><h3>要点一</h3><p>说明文字。</p></div>
+        <div class="card b-emerald step"><div class="top"></div><div class="tag">TAG</div><h3>要点二</h3><p>说明文字。</p></div>
+        <div class="card b-violet step"><div class="top"></div><div class="tag">TAG</div><h3>要点三</h3><p>说明文字。</p></div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ── 第 2 章 ── -->
+  <section class="slide chapter" data-chapter="2" data-chapter-title="第二章" data-chapter-color="#a78bfa">
+    <div class="chap-tag">PART · 02</div>
+    <h1>第二章标题</h1>
+    <div class="chap-sub">第二章的<strong>引子</strong>。</div>
+  </section>
+
+  <section class="slide" data-chapter="2">
+    <div class="kicker"><span class="ch">02 ·</span> 特性列表示例</div>
+    <h2>用 feat <span class="accent">逐条陈述</span></h2>
+    <div class="grow">
+      <ul class="feat">
+        <li class="reveal-item"><span class="mk">▸</span><span><b>第一条</b> <span class="dim">— 补充说明</span></span></li>
+        <li class="reveal-item"><span class="mk">▸</span><span><b>第二条</b> <span class="dim">— 补充说明</span></span></li>
+        <li class="reveal-item"><span class="mk">▸</span><span><b>第三条</b> <span class="dim">— 补充说明</span></span></li>
+      </ul>
+    </div>
+  </section>
+
+  <!-- 收尾 -->
+  <section class="slide closing">
+    <div class="kicker" style="justify-content:center;">小结</div>
+    <h1>一句话<span class="accent">收束全场</span></h1>
+    <div class="sub">把核心结论再说一遍。</div>
+  </section>
+
+</div>
+<!-- ↑↑↑ 只编辑上面的 #deck 区域 ↑↑↑ -->

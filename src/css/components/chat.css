@@ -1,0 +1,16 @@
+/* ── chat 点击揭示气泡 ── */
+.chat{display:flex;flex-direction:column;gap:1.1rem;max-width:860px;margin:0 auto;width:100%;}
+.bubble{border-radius:14px;padding:1.1rem 1.3rem;border:1px solid var(--line);}
+.bubble .who{font-family:var(--mono);font-size:.74rem;letter-spacing:.08em;margin-bottom:.5rem;}
+.bubble.ai{background:linear-gradient(160deg,var(--panel),var(--bg-2));align-self:flex-start;max-width:86%;}
+.bubble.ai .who{color:var(--accent);}
+.bubble.ai .text{font-size:1.08rem;line-height:1.6;color:var(--txt);}
+.bubble.human{background:rgba(74,222,128,.06);border-color:rgba(74,222,128,.35);align-self:flex-end;max-width:78%;cursor:pointer;position:relative;transition:background .2s;}
+.bubble.human:hover{background:rgba(74,222,128,.11);}
+.bubble.human .who{color:var(--emerald);}
+.bubble.human .answer{font-size:1.05rem;color:var(--txt);display:none;}
+.bubble.human .placeholder{font-size:.95rem;color:var(--txt-faint);font-style:italic;display:flex;align-items:center;gap:.5rem;}
+.bubble.human .placeholder::before{content:"▸";color:var(--emerald);}
+.bubble.human.revealed .answer{display:block;animation:fadein .35s ease;}
+.bubble.human.revealed .placeholder{display:none;}
+@keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}

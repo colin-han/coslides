@@ -1,0 +1,14 @@
+/* ── card 卡片网格 ── */
+.cards{display:grid;gap:1.1rem;}
+.cards.c2{grid-template-columns:repeat(2,1fr);}
+.cards.c3{grid-template-columns:repeat(3,1fr);}
+.card{background:linear-gradient(160deg,var(--panel),var(--bg-2));border:1px solid var(--line);border-radius:14px;padding:1.3rem 1.45rem;position:relative;overflow:hidden;will-change:transform;transition:transform .25s,border-color .25s,box-shadow .25s;}
+.card:hover{transform:translateY(-4px);border-color:rgba(56,224,208,.5);box-shadow:0 14px 40px -18px rgba(56,224,208,.5);}
+.card .top{position:absolute;top:0;left:0;right:0;height:3px;background:var(--accent);}
+.card.b-emerald .top{background:var(--emerald);} .card.b-amber .top{background:var(--amber);}
+.card.b-violet .top{background:var(--violet);} .card.b-blue .top{background:var(--blue);} .card.b-rose .top{background:var(--rose);}
+.card .tag{font-family:var(--mono);font-size:.72rem;letter-spacing:.1em;color:var(--txt-faint);text-transform:uppercase;}
+.card h3{font-size:1.18rem;margin:.35rem 0 .5rem;font-weight:680;}
+.card p{color:var(--txt-dim);font-size:.95rem;line-height:1.55;}
+.card .icon{font-family:var(--mono);font-size:1.4rem;color:var(--accent);}
+.b-emerald .icon{color:var(--emerald);} .b-amber .icon{color:var(--amber);} .b-violet .icon{color:var(--violet);} .b-blue .icon{color:var(--blue);} .b-rose .icon{color:var(--rose);}

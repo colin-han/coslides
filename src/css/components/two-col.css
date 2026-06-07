@@ -1,0 +1,2 @@
+/* ── two-col 两栏 ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1.6rem;}

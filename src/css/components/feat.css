@@ -1,0 +1,5 @@
+/* ── feat 特性列表 ── */
+ul.feat{list-style:none;display:flex;flex-direction:column;gap:.8rem;}
+ul.feat li{display:flex;gap:.9rem;align-items:flex-start;font-size:1.06rem;line-height:1.5;}
+ul.feat li .mk{color:var(--accent);font-family:var(--mono);font-weight:700;flex-shrink:0;}
+ul.feat li b{color:var(--txt);} ul.feat li span.dim{color:var(--txt-dim);}

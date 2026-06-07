@@ -1,0 +1,13 @@
+/* ── overview 缩略概览 ── */
+#overview{position:fixed;inset:0;z-index:30;background:rgba(8,12,24,.96);backdrop-filter:blur(6px);display:none;flex-direction:column;padding:4vh 5vw;overflow-y:auto;}
+#overview.show{display:flex;}
+#overview .ov-title{font-family:var(--mono);font-size:.85rem;letter-spacing:.16em;text-transform:uppercase;color:var(--accent);margin-bottom:1.6rem;}
+.ov-chapter{margin-bottom:1.8rem;}
+.ov-chapter .ov-ch-name{font-family:var(--mono);font-size:.8rem;letter-spacing:.1em;color:var(--txt-faint);margin-bottom:.7rem;text-transform:uppercase;}
+.ov-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(190px,1fr));gap:.8rem;}
+.ov-cell{border:1px solid var(--line);border-radius:10px;background:var(--panel);padding:.8rem 1rem;cursor:pointer;transition:transform .15s,border-color .15s;min-height:74px;display:flex;flex-direction:column;justify-content:space-between;}
+.ov-cell:hover{transform:translateY(-3px);border-color:var(--accent);}
+.ov-cell.cur{border-color:var(--accent);box-shadow:0 0 0 1px var(--accent) inset;}
+.ov-cell.sel{border-color:var(--accent);box-shadow:0 0 0 2px var(--accent),0 10px 28px -10px var(--accent);transform:translateY(-2px);}
+.ov-cell .ov-n{font-family:var(--mono);font-size:.72rem;color:var(--accent);}
+.ov-cell .ov-t{font-size:.92rem;color:var(--txt);line-height:1.35;font-weight:600;}

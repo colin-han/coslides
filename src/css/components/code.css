@@ -1,0 +1,3 @@
+/* ── code 代码块 ── */
+pre.code{font-family:var(--mono);font-size:.92rem;line-height:1.7;color:var(--txt-dim);background:#080c18;border:1px solid var(--line);border-radius:12px;padding:1.3rem 1.6rem;max-width:1000px;width:100%;white-space:pre;overflow-x:auto;}
+pre.code .k{color:var(--violet);} pre.code .s{color:var(--emerald);} pre.code .c{color:var(--txt-faint);} pre.code .f{color:var(--accent);}
