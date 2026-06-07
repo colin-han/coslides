@@ -1,0 +1,41 @@
+/* ── term-frame 终端分栏布局 ── */
+.term-frame{font-family:var(--mono);font-size:.78rem;line-height:1.65;background:#070b16;border:1px solid var(--line);border-radius:12px;width:1050px;max-width:94vw;height:460px;position:relative;overflow:visible;}
+
+/* ── pane 窗格 ── */
+.term-pane{display:flex;flex-direction:column;overflow:hidden;min-width:0;min-height:0;}
+.term-pane-title{background:rgba(255,255,255,.06);padding:6px 12px;font-size:.72rem;color:var(--txt-faint);border-bottom:1px solid rgba(255,255,255,.08);display:flex;align-items:center;gap:6px;flex-shrink:0;}
+.term-pane-title .dots{display:flex;gap:4px;}
+.term-pane-title .dots span{width:7px;height:7px;border-radius:50%;display:inline-block;}
+.term-pane-title .dots .r{background:#ff5f56;} .term-pane-title .dots .y{background:#ffbd2e;} .term-pane-title .dots .g{background:#27c93f;}
+.term-body{padding:8px 12px;flex:1;overflow-y:auto;color:var(--txt-dim);}
+.term-dim{opacity:.5;}
+
+/* ── term-cmd / term-out: TermBuilder 渲染目标 ── */
+.term-cmd{color:var(--txt-dim);margin:2px 0;white-space:pre;}
+.term-cmd .term-prompt{color:var(--accent);}
+.term-out{white-space:pre;margin:1px 0;}
+
+/* ── 单窗格（默认 flex） ── */
+.term-frame:not([class*="term-split"]):not([class*="term-l"]):not([class*="term-quad"]){display:flex;}
+
+/* ── 左右分栏 ── */
+.term-split-h{display:flex;}
+.term-split-h>.term-pane:first-child{flex:0 0 var(--split-h,50%);}
+.term-split-h>.term-pane+.term-pane{border-left:1px solid rgba(255,255,255,.1);}
+
+/* ── 上下分栏 ── */
+.term-split-v{display:flex;flex-direction:column;}
+.term-split-v>.term-pane:first-child{flex:0 0 var(--split-v,50%);}
+.term-split-v>.term-pane+.term-pane{border-top:1px solid rgba(255,255,255,.1);}
+
+/* ── 左1右2 ── */
+.term-l1r2{display:grid;grid-template-columns:var(--split-h,50%) 1fr;grid-template-rows:var(--split-v,50%) 1fr;}
+.term-l1r2>.term-pane:nth-child(1){grid-row:1/3;}
+.term-l1r2>.term-pane:nth-child(2){grid-column:2;border-left:1px solid rgba(255,255,255,.1);}
+.term-l1r2>.term-pane:nth-child(3){grid-column:2;grid-row:2;border-left:1px solid rgba(255,255,255,.1);border-top:1px solid rgba(255,255,255,.1);}
+
+/* ── 四宫格 ── */
+.term-quad{display:grid;grid-template-columns:var(--split-h,50%) 1fr;grid-template-rows:var(--split-v,50%) 1fr;}
+.term-quad>.term-pane:nth-child(2){border-left:1px solid rgba(255,255,255,.1);}
+.term-quad>.term-pane:nth-child(3){border-top:1px solid rgba(255,255,255,.1);}
+.term-quad>.term-pane:nth-child(4){border-left:1px solid rgba(255,255,255,.1);border-top:1px solid rgba(255,255,255,.1);}

@@ -1,6 +1,6 @@
 # coslides 组件参考手册
 
-> 复制片段到模板 `assets/coslides-template.html` 的 `#deck` 内即可。所有组件已在模板的 `<style>` 中定义，**不要新增/修改 CSS**（仅顶部 `:root` 配置区可改主色）。
+> 复制片段到模板 `assets/coslides-core.html` 的 `#deck` 内即可。组件样式需从 `src/css/components/{name}.css` 按需加载，插入 `<style>` 块末尾（详见 `SKILL.md`「组件按需加载」）。**不要新增/修改核心 CSS**（仅顶部 `:root` 配置区可改主色）。
 >
 > 通用约定：
 > - 每页是一个 `<section class="slide">`，首页加 `active`。
@@ -112,6 +112,37 @@
 </div>
 ```
 
+### term-frame 终端分栏布局
+多窗格终端 UI 框架，配合 `TermBuilder` 和 `Balloon` / `KeyHint` 实现沉浸式交互演示。需要加载 `src/css/components/term-frame.css`。
+
+布局类（加在 `term-frame` 上）：
+- 无修饰 → 单窗格
+- `term-split-h` → 左右分栏
+- `term-split-v` → 上下分栏
+- `term-l1r2` → 左 1 右 2（不对称三栏）
+- `term-quad` → 四宫格
+
+比例通过 CSS 变量控制：`--split-h`（水平占比）/ `--split-v`（垂直占比），默认 50%。
+```html
+<div class="term-frame term-l1r2" style="--split-h:70%;--split-v:30%;">
+  <div class="term-pane term-dim">
+    <div class="term-pane-title"><div class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>Claude Code</div>
+    <div class="term-body" id="p1"></div>
+  </div>
+  <div class="term-pane">
+    <div class="term-pane-title"><div class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>Terminal</div>
+    <div class="term-body" id="p2"></div>
+  </div>
+  <div class="term-pane term-dim">
+    <div class="term-pane-title"><div class="dots"><span class="r"></span><span class="y"></span><span class="g"></span></div>dev server</div>
+    <div class="term-body" id="p3"></div>
+  </div>
+</div>
+```
+> - `.term-pane` 窗格 · `.term-pane-title` 标题（自定义文字）· `.term-body` 内容区（TermBuilder 操作目标，需 `id`）· `.term-dim` 暗淡窗格。
+> - `.dots .r/.y/.g` 窗口按钮（红/黄/绿），可选。
+> - 加载样式：`src/css/components/term-frame.css` + `bubble.css` + `keyhint.css`（后两者视需要）。
+
 ### tree 目录树
 `.d` 目录(主色) / `.hl` 高亮(绿) / `.cm` 注释(灰) / `.pl` 紫 / `<b>` 文件名。整块用 `white-space:pre`，直接换行排版。
 ```html
@@ -179,6 +210,101 @@
     <div class="placeholder">点击揭示回答…</div>
   </div>
 </div>
+```
+
+---
+
+## 二.五、交互工具（JS Snippet）
+
+以下工具为 JS 代码片段，从 `src/js/snippets/` 读取后插入 section 的 `<script>` 块顶部。配合 `data-steps` + `coslides:step` 事件使用。
+
+### TermBuilder 终端内容操作
+
+需要：`src/js/snippets/term-builder.js`
+
+操作 `.term-body` 元素，维护命令组序列（命令 + 输出），每步自动渲染。
+
+| 方法 | 说明 |
+|------|------|
+| `t.cmd(text)` | 追加命令行（自动加 `$` prompt） |
+| `t.output(lines)` | 为最后一条命令追加输出行 |
+| `t.replaceOutput(lines)` | 替换最后一条命令的全部输出 |
+| `t.replaceLastCmd(text)` | 替换最后一条命令文本 |
+| `t.removeLastCmd()` | 删除最后一个命令组 |
+| `t.removeLastOutput()` | 删除最后一条命令的输出（保留命令行） |
+| `t.clearAll()` | 清空所有内容 |
+
+**颜色转义：** 文本中用 `\mXX;` 标记颜色，`\m0;` 重置。
+
+| 转义 | 效果 | 转义 | 效果 |
+|------|------|------|------|
+| `\m0;` | 重置 | `\mok;` | ✓ 绿色 |
+| `\m1;` | 粗体 | `\mwarn;` | ⚠ 黄色 |
+| `\m2;` | 暗淡 | `\merr;` | ✗ 红色 |
+| `\m31;`–`\m36;` | ANSI 红→青 | `\maccent;` | 主色 |
+| `\mdim;` | 暗淡 | `\mbright;` | 亮白 |
+
+> **注意：** JS 字符串中需要双反斜杠：`'\\mok;✓\\m0;'` → 渲染为绿色 ✓。
+
+```javascript
+// section <script> 中的使用模板
+const sec = document.currentScript.parentElement;
+const t = new TermBuilder(sec.querySelector('#p1'));
+
+const steps = [
+  () => { t.cmd('npm install'); t.output(['Installing...']); },
+  () => { t.replaceOutput(['\\mok;✓\\m0; done']); },
+];
+
+sec.addEventListener('coslides:step', (e) => {
+  const s = e.detail.step;
+  if (s === 0) { t.clearAll(); return; }
+  if (s > 0 && s <= steps.length) steps[s - 1]();
+});
+```
+
+### Balloon 气泡提示
+
+需要：`src/js/snippets/bubble.js` + `src/css/components/bubble.css`
+
+在任意容器上方显示浮动提示气泡，颜色跟随章节主题色。
+
+```javascript
+const { show: showBubble, hide: hideBubble } = createBubble(container);
+```
+
+| 类型 | 图标 | 场景 |
+|------|------|------|
+| `'tip'` | 💡 | 提示、说明 |
+| `'warning'` | ⚠️ | 警告 |
+| `'error'` | 🚫 | 错误 |
+| `'thinking'` | 💬 | 画外音/思考 |
+
+`container` 可以是 `.term-frame`（终端内）或 section（独立使用）。容器需 `position: relative`（`createBubble` 自动设置）。
+
+```javascript
+// 终端场景
+const frame = sec.querySelector('.term-frame');
+const { show: showBubble, hide: hideBubble } = createBubble(frame);
+showBubble('tip', '使用上下键选择');
+```
+
+### KeyHint 按键提示
+
+需要：`src/js/snippets/keyhint.js` + `src/css/components/keyhint.css`
+
+在任意容器下方显示按键提示，每个键渲染为 `<kbd>` 按钮样式。
+
+```javascript
+const { show: showKeyHint, hide: hideKeyHint } = createKeyHint(container);
+```
+
+修饰键自动转换：`cmd`→`⌘` · `ctrl`→`⌃` · `shift`→`⇧` · `alt`→`⌥` · `enter`→`⏎` · `tab`→`⇥` · `esc`→`⎋`。用 `+` 连接多键：`'cmd+shift+P'` → ⌘+⇧+P。
+
+```javascript
+showKeyHint('↓');           // 单键
+showKeyHint('cmd+C');       // ⌘+C
+showKeyHint('ctrl+shift+P');// ⌃+⇧+P
 ```
 
 ---

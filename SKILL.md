@@ -10,13 +10,44 @@ description: 用 coslides 框架快速生成演示文稿（单文件 HTML slides
 ## 框架在哪
 
 路径相对本 skill 根目录：
-- `assets/coslides-template.html` —— 单文件模板（含全部 CSS/JS）。**复制它，只在 `#deck` 内填 `<section>`。**
+- `assets/coslides-core.html` —— 核心模板（CSS/JS/导航/粒子/批注，不含组件样式）。**复制它作为基础。**
+- `src/css/components/*.css` —— 组件样式文件，**按需读取并插入到 `<style>` 块中**（见下方「组件按需加载」）。
 - `references/COMPONENTS.md` —— 组件手册：每个组件的可复制 HTML 片段 + 何时用。**填内容前先读它。**
 - `references/demo-deck.html` —— 完整范例，照着学结构与组件用法。
 
+### 组件按需加载
+
+核心模板不包含组件 CSS（card、term、pipeline 等）。生成演示文稿时，根据大纲中用到的组件，读取对应的 `src/css/components/{name}.css` 文件，将内容**插入到 `<style>` 块末尾**（`</style>` 之前）。
+
+可用组件文件：
+| 文件 | 组件 | 典型场景 |
+|------|------|---------|
+| `card.css` | `.cards` `.card` | 并列要点、对比 |
+| `feat.css` | `ul.feat` | 逐条陈述 |
+| `note-card.css` | `.note-card` | 一句关键结论 |
+| `term.css` | `.term` | 命令行/输出展示 |
+| `tree.css` | `.tree` | 目录/文件结构 |
+| `code.css` | `pre.code` | 代码块 |
+| `chips.css` | `.chips` `.chip` | 标签集合 |
+| `pipeline.css` | `.pipe` `.pnode` | 线性步骤 |
+| `flow.css` | `.flow-*` | 决策流程图 |
+| `chat.css` | `.chat` `.bubble` | 问答/点击揭示 |
+| `two-col.css` | `.two-col` | 左右对照 |
+| `term-frame.css` | `.term-frame` `.term-pane` | 终端分栏布局 |
+| `bubble.css` | `.term-bubble` | 画外音/气泡提示 |
+| `keyhint.css` | `.term-keyhint` `kbd` | 按键提示 |
+
+终端交互演示还需要 JS 工具代码。根据页面需求，读取对应文件并将内容插入 section 的 `<script>` 块顶部（在 step 逻辑之前）：
+
+| 文件 | 工具 | 何时加载 |
+|------|------|---------|
+| `src/js/snippets/term-builder.js` | `TermBuilder` | 使用终端交互时 |
+| `src/js/snippets/bubble.js` | `createBubble` | 使用气泡提示时 |
+| `src/js/snippets/keyhint.js` | `createKeyHint` | 使用按键提示时 |
+
 ## 硬约束（必须遵守）
 
-1. **不要改动模板顶部原有的 `<style>` 和底部原有的 `<script>`**（导航 / 粒子 / 分步等核心逻辑）。配色只改顶部 `:root` 的 `--accent` / `--accent-2` / `--bg`。**做交互时，可以在你自己的 `<section>` 内新增 `<style>` 和 `<script>`**（见「交互与分步」）。
+1. **不要改动模板顶部原有的 `<style>` 和底部原有的 `<script>`**（导航 / 粒子 / 分步等核心逻辑）。配色只改顶部 `:root` 的 `--accent` / `--accent-2` / `--bg`。组件样式（card、term 等）从 `src/css/components/` 读取后追加到 `<style>` 块末尾。**做交互时，可以在你自己的 `<section>` 内新增 `<style>` 和 `<script>`**（见「交互与分步」）。
 2. **只在 `#deck` 区域内写 `<section class="slide">`**。
 3. 不要引入任何外部依赖（CDN、字体、图片外链）——产物必须是自包含单文件。
 4. 搭页面优先用 `references/COMPONENTS.md` 里的现成组件；做交互或自定义视觉时，可在 section 内自由写样式与脚本。布局微调用内联 `style`（如 `style="justify-content:center"`）。
@@ -70,10 +101,11 @@ description: 用 coslides 框架快速生成演示文稿（单文件 HTML slides
 ### 第 5 步 · 输出文件
 全部页面确认完成（或用户选择跳过逐页确认）后：
 
-1. 复制 `assets/coslides-template.html` 到目标文件（如 `<主题>-deck.html`）。
-2. 改 `<title>` 和 `#brandname` 为本演示的标题 / 品牌。
-3. 需要换主色时改顶部 `:root` 的 `--accent`。
-4. 清空 `#deck` 内的占位示例 section，按大纲逐章写：
+1. 复制 `assets/coslides-core.html` 到目标文件（如 `<主题>-deck.html`）。
+2. **按需加载组件样式**：根据大纲中用到的组件，读取 `src/css/components/{name}.css`，将内容插入到 `<style>` 块的 `</style>` 之前。
+3. 改 `<title>` 和 `#brandname` 为本演示的标题 / 品牌。
+4. 需要换主色时改顶部 `:root` 的 `--accent`。
+5. 清空 `#deck` 内的占位示例 section，按大纲逐章写：
    - 封面 / 议程 / 收尾**不写** `data-chapter`。
    - 每章第一页用 `chapter` 页，带 `data-chapter="N"` + `data-chapter-title="章名"`；可选 `data-chapter-color="#rrggbb"` 给该章一个主题色（章内高亮、进度条、圆点随之变色）。
    - 该章其余页带 `data-chapter="N"`（颜色/标题只写在第一页）。
@@ -82,6 +114,8 @@ description: 用 coslides 框架快速生成演示文稿（单文件 HTML slides
 
 ### 第 6 步 · 自检（产出前逐项核对）
 - [ ] 模板顶部原有的 `<style>` 与底部原有的 `<script>` 未被改动（`:root` 三个变量除外）；自定义样式/交互写在 section 内
+- [ ] 用到的组件样式已从 `src/css/components/` 加载并插入 `<style>` 块
+- [ ] 若用终端交互：JS snippet（term-builder / bubble / keyhint）已从 `src/js/snippets/` 读取并插入 section `<script>`
 - [ ] 只有第一页有 `active`
 - [ ] `data-chapter` 编号连续（1,2,3…），每章首页有 `data-chapter-title`
 - [ ] 无占位符残留（"写在这里""TAG""说明文字"等）、无空 `<section>`
@@ -108,6 +142,9 @@ description: 用 coslides 框架快速生成演示文稿（单文件 HTML slides
   | 现场问答 / 互动 | `chat`（点击揭示） |
   | 一句关键结论 | `note-card` |
   | 左右对照 | `two-col` |
+  | 终端交互演示 | `term-frame` + `TermBuilder` |
+  | 画外音/提示 | Balloon（`bubble`） |
+  | 按键提示 | KeyHint（`keyhint`） |
 - **章节节奏**：每章用 `chapter` 分隔页开场；章内 3-6 页为宜。
 - 强调用 `.accent`（主色）/ `.hl`（黄）/ `.ref`（引用路径）。
 
