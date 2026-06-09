@@ -404,9 +404,9 @@ function updateMobileScale() {
   deck.style.width = MOBILE_DESIGN_W + 'px';
   deck.style.height = MOBILE_DESIGN_H + 'px';
   deck.style.position = 'fixed';
-  deck.style.top = ((vh - MOBILE_BAR_H - MOBILE_DESIGN_H * scale) / 2) + 'px';
-  deck.style.left = ((vw - MOBILE_DESIGN_W * scale) / 2) + 'px';
-  deck.style.transform = 'scale(' + scale + ')';
+  deck.style.top = ((vh - MOBILE_BAR_H) / 2) + 'px';
+  deck.style.left = '50%';
+  deck.style.transform = 'translate(-50%,-50%) scale(' + scale + ')';
 }
 window.addEventListener('resize', updateMobileScale);
 
