@@ -109,3 +109,32 @@ document.getElementById('deck').addEventListener('click', (e) => {
 let tx = 0;
 document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
 document.addEventListener('touchend', e => { const dx = e.changedTouches[0].clientX - tx; if (dx < -50) next(); else if (dx > 50) prev(); }, { passive: true });
+
+// ── mobile viewport scaling ──
+const MOBILE_DESIGN_W = 1200;
+const MOBILE_DESIGN_H = 675;  // 16:9
+
+function updateMobileScale() {
+  var deck = document.getElementById('deck');
+  var vw = window.innerWidth;
+  var vh = window.innerHeight;
+
+  if (vw >= 768 && vh >= 500) {
+    deck.style.transform = '';
+    deck.style.width = '';
+    deck.style.height = '';
+    deck.style.position = '';
+    deck.style.top = '';
+    deck.style.left = '';
+    return;
+  }
+
+  var scale = Math.min(vw / MOBILE_DESIGN_W, vh / MOBILE_DESIGN_H);
+  deck.style.width = MOBILE_DESIGN_W + 'px';
+  deck.style.height = MOBILE_DESIGN_H + 'px';
+  deck.style.position = 'fixed';
+  deck.style.top = '50%';
+  deck.style.left = '50%';
+  deck.style.transform = 'translate(-50%,-50%) scale(' + scale + ')';
+}
+window.addEventListener('resize', updateMobileScale);
