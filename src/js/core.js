@@ -108,11 +108,26 @@ document.getElementById('deck').addEventListener('click', (e) => {
 });
 let tx = 0;
 document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
-document.addEventListener('touchend', e => { const dx = e.changedTouches[0].clientX - tx; if (dx < -50) next(); else if (dx > 50) prev(); }, { passive: true });
+document.addEventListener('touchend', e => {
+  const x = e.changedTouches[0].clientX;
+  const dx = x - tx;
+  if (window.innerWidth < 768 || window.innerHeight < 500) {
+    // Mobile: tap zones — left 1/3 prev, right 2/3 advance
+    if (Math.abs(dx) < 30) { x < window.innerWidth / 3 ? prev() : advance(); }
+    return;
+  }
+  // Desktop touch: swipe
+  if (dx < -50) next(); else if (dx > 50) prev();
+}, { passive: true });
+
+// Mobile bar buttons
+document.getElementById('mb-prev').addEventListener('click', e => { e.stopPropagation(); prev(); });
+document.getElementById('mb-next').addEventListener('click', e => { e.stopPropagation(); advance(); });
 
 // ── mobile viewport scaling ──
 const MOBILE_DESIGN_W = 1200;
 const MOBILE_DESIGN_H = 675;  // 16:9
+const MOBILE_BAR_H = 44;
 
 function updateMobileScale() {
   var deck = document.getElementById('deck');
@@ -129,12 +144,12 @@ function updateMobileScale() {
     return;
   }
 
-  var scale = Math.min(vw / MOBILE_DESIGN_W, vh / MOBILE_DESIGN_H);
+  var scale = Math.min(vw / MOBILE_DESIGN_W, (vh - MOBILE_BAR_H) / MOBILE_DESIGN_H);
   deck.style.width = MOBILE_DESIGN_W + 'px';
   deck.style.height = MOBILE_DESIGN_H + 'px';
   deck.style.position = 'fixed';
-  deck.style.top = '50%';
-  deck.style.left = '50%';
-  deck.style.transform = 'translate(-50%,-50%) scale(' + scale + ')';
+  deck.style.top = ((vh - MOBILE_BAR_H - MOBILE_DESIGN_H * scale) / 2) + 'px';
+  deck.style.left = ((vw - MOBILE_DESIGN_W * scale) / 2) + 'px';
+  deck.style.transform = 'scale(' + scale + ')';
 }
 window.addEventListener('resize', updateMobileScale);
