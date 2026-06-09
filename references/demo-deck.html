@@ -4,6 +4,20 @@
   │  coslides · 单文件演示文稿模板                                          │
   │  用法：只在下方 #deck 内填写 <section class="slide"> 页面。            │
   │  不要修改 <style> / <script>（仅顶部 :root 配置区可改主色）。          │
+  │  组件用法见 references/COMPONENTS.md，范例见本文件。                     │
+  └─────────────────────────────────────────────────────────────────────┘
+-->
+<html lang="zh-CN">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>coslides · 框架能力全展示</title>
+<!DOCTYPE html>
+<!--
+  ┌─────────────────────────────────────────────────────────────────────┐
+  │  coslides · 单文件演示文稿模板                                          │
+  │  用法：只在下方 #deck 内填写 <section class="slide"> 页面。            │
+  │  不要修改 <style> / <script>（仅顶部 :root 配置区可改主色）。          │
   │  组件用法见 references/COMPONENTS.md，范例见 references/demo-deck.html。  │
   └─────────────────────────────────────────────────────────────────────┘
 -->
@@ -12,7 +26,7 @@
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
 <!-- ↓ 改这里：deck 标题（浏览器标签 + 分享标题） -->
-<title>coslides · 框架能力全展示</title>
+<title>未命名演示 · coslides</title>
 <style>
 /* ── 基础：变量、重置、排版 ── */
 :root {
@@ -33,7 +47,7 @@ html,body{height:100%;background:var(--bg);color:var(--txt);font-family:var(--sa
 body::before{content:"";position:fixed;inset:0;z-index:0;background-image:linear-gradient(rgba(56,224,208,.035) 1px,transparent 1px),linear-gradient(90deg,rgba(56,224,208,.035) 1px,transparent 1px);background-size:44px 44px;pointer-events:none;}
 body::after{content:"";position:fixed;inset:0;z-index:0;background:radial-gradient(ellipse 80% 60% at 50% -10%,rgba(96,165,250,.10),transparent 60%);pointer-events:none;}
 #bg{position:fixed;inset:0;z-index:0;pointer-events:none;}
-#deck{position:relative;height:100%;width:100%;z-index:1;}
+#deck{position:relative;height:100%;width:100%;z-index:1;transform-origin:center center;}
 
 /* ── 文本 ── */
 .kicker{font-family:var(--mono);font-size:.8rem;letter-spacing:.18em;text-transform:uppercase;color:var(--accent);margin-bottom:.8rem;display:flex;align-items:center;gap:.6rem;}
@@ -138,9 +152,10 @@ body.commenting #cm-banner{display:block;}
 #cm-json .cm-jerr{font-family:var(--mono);font-size:.78rem;color:var(--rose);}
 #cm-json .cm-jclear{border-color:var(--rose);color:var(--rose);background:rgba(251,113,133,.07);margin-left:auto;}
 
-/* ═══════════════════════════════════════════════════════════════════════
-     组件 CSS（从 src/css/components/ 合并）
-     ═══════════════════════════════════════════════════════════════════════ */
+
+/* ── bubble 气泡提示 ── */
+.term-bubble{background:rgba(var(--accent-rgb,56,224,208),.12);border:1px solid rgba(var(--accent-rgb,56,224,208),.4);border-radius:10px;padding:8px 14px;color:var(--txt);font-size:.82rem;font-family:var(--sans);white-space:nowrap;position:absolute;top:-44px;left:50%;transform:translateX(-50%);z-index:10;pointer-events:none;animation:bubble-in .3s ease;}
+@keyframes bubble-in{from{opacity:0;transform:translateX(-50%) translateY(6px);}to{opacity:1;transform:translateX(-50%);}}
 
 /* ── card 卡片网格 ── */
 .cards{display:grid;gap:1.1rem;}
@@ -156,60 +171,6 @@ body.commenting #cm-banner{display:block;}
 .card p{color:var(--txt-dim);font-size:.95rem;line-height:1.55;}
 .card .icon{font-family:var(--mono);font-size:1.4rem;color:var(--accent);}
 .b-emerald .icon{color:var(--emerald);} .b-amber .icon{color:var(--amber);} .b-violet .icon{color:var(--violet);} .b-blue .icon{color:var(--blue);} .b-rose .icon{color:var(--rose);}
-
-/* ── feat 特性列表 ── */
-ul.feat{list-style:none;display:flex;flex-direction:column;gap:.8rem;}
-ul.feat li{display:flex;gap:.9rem;align-items:flex-start;font-size:1.06rem;line-height:1.5;}
-ul.feat li .mk{color:var(--accent);font-family:var(--mono);font-weight:700;flex-shrink:0;}
-ul.feat li b{color:var(--txt);} ul.feat li span.dim{color:var(--txt-dim);}
-
-/* ── note-card 强调框 ── */
-.note-card{max-width:780px;margin:0 auto;background:linear-gradient(160deg,rgba(74,222,128,.08),var(--bg-2));border:1px solid rgba(74,222,128,.35);border-radius:14px;padding:1.6rem 1.8rem;font-size:1.2rem;line-height:1.7;color:var(--txt-dim);}
-.note-card strong{color:var(--emerald);}
-
-/* ── term 终端模拟 ── */
-.term{font-family:var(--mono);font-size:.92rem;line-height:1.75;background:#070b16;border:1px solid var(--line);border-radius:12px;padding:1.3rem 1.6rem;max-width:880px;width:100%;}
-.term .bar{display:flex;gap:.5rem;margin-bottom:.9rem;}
-.term .bar i{width:11px;height:11px;border-radius:50%;display:inline-block;}
-.term .bar .r{background:#ff5f56;} .term .bar .y{background:#ffbd2e;} .term .bar .g{background:#27c93f;}
-.term .ln{white-space:pre;color:var(--txt-dim);}
-.term .ln .ok{color:var(--emerald);} .term .ln .run{color:var(--accent);} .term .ln .dim{color:var(--txt-faint);} .term .ln .warn{color:var(--amber);}
-
-/* ── tree 目录树 ── */
-.tree{font-family:var(--mono);font-size:.92rem;line-height:1.8;color:var(--txt-dim);background:#080c18;border:1px solid var(--line);border-radius:12px;padding:1.4rem 1.7rem;max-width:1100px;white-space:pre;overflow-x:auto;}
-.tree .d{color:var(--accent);} .tree .hl{color:var(--emerald);} .tree .cm{color:var(--txt-faint);} .tree .pl{color:var(--violet);}
-.tree b{color:var(--txt);font-weight:600;}
-
-/* ── code 代码块 ── */
-pre.code{font-family:var(--mono);font-size:.92rem;line-height:1.7;color:var(--txt-dim);background:#080c18;border:1px solid var(--line);border-radius:12px;padding:1.3rem 1.6rem;max-width:1000px;width:100%;white-space:pre;overflow-x:auto;}
-pre.code .k{color:var(--violet);} pre.code .s{color:var(--emerald);} pre.code .c{color:var(--txt-faint);} pre.code .f{color:var(--accent);}
-
-/* ── chips ── */
-.chips{display:flex;flex-wrap:wrap;gap:.5rem;max-width:840px;}
-.chip{font-family:var(--mono);font-size:.8rem;padding:.35rem .7rem;border-radius:7px;border:1px solid var(--line);color:var(--accent);background:rgba(56,224,208,.05);}
-
-/* ── pipeline 流程条 ── */
-.pipe{display:flex;align-items:stretch;justify-content:center;gap:0;width:100%;margin-top:.5rem;flex-wrap:wrap;}
-.pnode{flex:1;min-width:150px;max-width:210px;border:1px solid var(--line);border-radius:12px;padding:1rem;background:var(--panel);text-align:center;}
-.pnode .pc{font-family:var(--mono);font-size:.95rem;color:var(--accent);font-weight:600;}
-.pnode .pd{font-size:.82rem;color:var(--txt-dim);margin-top:.35rem;line-height:1.45;}
-.psep{display:flex;align-items:center;padding:0 .5rem;color:var(--accent);font-size:1.4rem;}
-
-/* ── flow 决策流程图 ── */
-.flow-node{font-family:var(--mono);font-size:1rem;padding:.8rem 1.5rem;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--txt);}
-.flow-node code{color:var(--accent);}
-.flow-arr{color:var(--txt-faint);font-family:var(--mono);font-size:.9rem;letter-spacing:.12em;}
-.flow-decide{text-align:center;padding:.95rem 1.8rem;border:1.5px solid rgba(251,191,36,.5);border-radius:12px;background:rgba(251,191,36,.06);font-size:1.15rem;font-weight:650;color:var(--amber);}
-.flow-decide .sub2{font-size:.82rem;font-weight:400;color:var(--txt-dim);margin-top:.3rem;}
-.flow-branch{flex:1;border:1px solid var(--line);border-radius:12px;padding:1rem 1.2rem;background:var(--panel);}
-.flow-branch .bl{font-family:var(--mono);font-size:.8rem;letter-spacing:.06em;margin-bottom:.35rem;}
-.flow-branch .bt{font-weight:680;font-size:1.05rem;margin-bottom:.35rem;color:var(--txt);}
-.flow-branch .bd{font-size:.86rem;color:var(--txt-dim);line-height:1.5;}
-.flow-branch.warn{border-color:rgba(251,191,36,.45);} .flow-branch.warn .bl{color:var(--amber);}
-.flow-branch.ok{border-color:rgba(74,222,128,.45);} .flow-branch.ok .bl{color:var(--emerald);}
-.flow-out{flex:1;text-align:center;font-weight:680;font-size:1.15rem;padding:.9rem;border-radius:12px;border:1.5px solid;}
-.flow-out.a{color:var(--accent);border-color:var(--accent);background:rgba(56,224,208,.07);}
-.flow-out.b{color:var(--violet);border-color:var(--violet);background:rgba(167,139,250,.07);}
 
 /* ── chat 点击揭示气泡 ── */
 .chat{display:flex;flex-direction:column;gap:1.1rem;max-width:860px;margin:0 auto;width:100%;}
@@ -228,8 +189,51 @@ pre.code .k{color:var(--violet);} pre.code .s{color:var(--emerald);} pre.code .c
 .bubble.human.revealed .placeholder{display:none;}
 @keyframes fadein{from{opacity:0;transform:translateY(6px);}to{opacity:1;transform:none;}}
 
-/* ── two-col 两栏 ── */
-.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1.6rem;}
+/* ── chips ── */
+.chips{display:flex;flex-wrap:wrap;gap:.5rem;max-width:840px;}
+.chip{font-family:var(--mono);font-size:.8rem;padding:.35rem .7rem;border-radius:7px;border:1px solid var(--line);color:var(--accent);background:rgba(56,224,208,.05);}
+
+/* ── code 代码块 ── */
+pre.code{font-family:var(--mono);font-size:.92rem;line-height:1.7;color:var(--txt-dim);background:#080c18;border:1px solid var(--line);border-radius:12px;padding:1.3rem 1.6rem;max-width:1000px;width:100%;white-space:pre;overflow-x:auto;}
+pre.code .k{color:var(--violet);} pre.code .s{color:var(--emerald);} pre.code .c{color:var(--txt-faint);} pre.code .f{color:var(--accent);}
+
+/* ── feat 特性列表 ── */
+ul.feat{list-style:none;display:flex;flex-direction:column;gap:.8rem;}
+ul.feat li{display:flex;gap:.9rem;align-items:flex-start;font-size:1.06rem;line-height:1.5;}
+ul.feat li .mk{color:var(--accent);font-family:var(--mono);font-weight:700;flex-shrink:0;}
+ul.feat li b{color:var(--txt);} ul.feat li span.dim{color:var(--txt-dim);}
+
+/* ── flow 决策流程图 ── */
+.flow-node{font-family:var(--mono);font-size:1rem;padding:.8rem 1.5rem;border:1px solid var(--line);border-radius:12px;background:var(--panel);color:var(--txt);}
+.flow-node code{color:var(--accent);}
+.flow-arr{color:var(--txt-faint);font-family:var(--mono);font-size:.9rem;letter-spacing:.12em;}
+.flow-decide{text-align:center;padding:.95rem 1.8rem;border:1.5px solid rgba(251,191,36,.5);border-radius:12px;background:rgba(251,191,36,.06);font-size:1.15rem;font-weight:650;color:var(--amber);}
+.flow-decide .sub2{font-size:.82rem;font-weight:400;color:var(--txt-dim);margin-top:.3rem;}
+.flow-branch{flex:1;border:1px solid var(--line);border-radius:12px;padding:1rem 1.2rem;background:var(--panel);}
+.flow-branch .bl{font-family:var(--mono);font-size:.8rem;letter-spacing:.06em;margin-bottom:.35rem;}
+.flow-branch .bt{font-weight:680;font-size:1.05rem;margin-bottom:.35rem;color:var(--txt);}
+.flow-branch .bd{font-size:.86rem;color:var(--txt-dim);line-height:1.5;}
+.flow-branch.warn{border-color:rgba(251,191,36,.45);} .flow-branch.warn .bl{color:var(--amber);}
+.flow-branch.ok{border-color:rgba(74,222,128,.45);} .flow-branch.ok .bl{color:var(--emerald);}
+.flow-out{flex:1;text-align:center;font-weight:680;font-size:1.15rem;padding:.9rem;border-radius:12px;border:1.5px solid;}
+.flow-out.a{color:var(--accent);border-color:var(--accent);background:rgba(56,224,208,.07);}
+.flow-out.b{color:var(--violet);border-color:var(--violet);background:rgba(167,139,250,.07);}
+
+/* ── keyhint 按键提示 ── */
+.term-keyhint{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);background:rgba(15,22,41,.92);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:4px 16px;font-family:var(--mono);font-size:.85rem;color:var(--accent);z-index:10;pointer-events:none;display:flex;align-items:center;gap:2px;white-space:nowrap;animation:bubble-in .25s ease;}
+.term-keyhint kbd{display:inline-block;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:4px;padding:1px 7px;font-family:var(--mono);font-size:.82rem;color:var(--txt);min-width:1.4em;text-align:center;line-height:1.6;}
+.term-keyhint .key-sep{color:var(--txt-faint);margin:0 2px;font-size:.75rem;}
+
+/* ── note-card 强调框 ── */
+.note-card{max-width:780px;margin:0 auto;background:linear-gradient(160deg,rgba(74,222,128,.08),var(--bg-2));border:1px solid rgba(74,222,128,.35);border-radius:14px;padding:1.6rem 1.8rem;font-size:1.2rem;line-height:1.7;color:var(--txt-dim);}
+.note-card strong{color:var(--emerald);}
+
+/* ── pipeline 流程条 ── */
+.pipe{display:flex;align-items:stretch;justify-content:center;gap:0;width:100%;margin-top:.5rem;flex-wrap:wrap;}
+.pnode{flex:1;min-width:150px;max-width:210px;border:1px solid var(--line);border-radius:12px;padding:1rem;background:var(--panel);text-align:center;}
+.pnode .pc{font-family:var(--mono);font-size:.95rem;color:var(--accent);font-weight:600;}
+.pnode .pd{font-size:.82rem;color:var(--txt-dim);margin-top:.35rem;line-height:1.45;}
+.psep{display:flex;align-items:center;padding:0 .5rem;color:var(--accent);font-size:1.4rem;}
 
 /* ── term-frame 终端分栏布局 ── */
 .term-frame{font-family:var(--mono);font-size:.78rem;line-height:1.65;background:#070b16;border:1px solid var(--line);border-radius:12px;width:1050px;max-width:94vw;height:460px;position:relative;overflow:visible;}
@@ -273,14 +277,22 @@ pre.code .k{color:var(--violet);} pre.code .s{color:var(--emerald);} pre.code .c
 .term-quad>.term-pane:nth-child(3){border-top:1px solid rgba(255,255,255,.1);}
 .term-quad>.term-pane:nth-child(4){border-left:1px solid rgba(255,255,255,.1);border-top:1px solid rgba(255,255,255,.1);}
 
-/* ── bubble 气泡提示 ── */
-.term-bubble{background:rgba(var(--accent-rgb,56,224,208),.12);border:1px solid rgba(var(--accent-rgb,56,224,208),.4);border-radius:10px;padding:8px 14px;color:var(--txt);font-size:.82rem;font-family:var(--sans);white-space:nowrap;position:absolute;top:-44px;left:50%;transform:translateX(-50%);z-index:10;pointer-events:none;animation:bubble-in .3s ease;}
-@keyframes bubble-in{from{opacity:0;transform:translateX(-50%) translateY(6px);}to{opacity:1;transform:translateX(-50%);}}
+/* ── term 终端模拟 ── */
+.term{font-family:var(--mono);font-size:.92rem;line-height:1.75;background:#070b16;border:1px solid var(--line);border-radius:12px;padding:1.3rem 1.6rem;max-width:880px;width:100%;}
+.term .bar{display:flex;gap:.5rem;margin-bottom:.9rem;}
+.term .bar i{width:11px;height:11px;border-radius:50%;display:inline-block;}
+.term .bar .r{background:#ff5f56;} .term .bar .y{background:#ffbd2e;} .term .bar .g{background:#27c93f;}
+.term .ln{white-space:pre;color:var(--txt-dim);}
+.term .ln .ok{color:var(--emerald);} .term .ln .run{color:var(--accent);} .term .ln .dim{color:var(--txt-faint);} .term .ln .warn{color:var(--amber);}
 
-/* ── keyhint 按键提示 ── */
-.term-keyhint{position:absolute;bottom:8px;left:50%;transform:translateX(-50%);background:rgba(15,22,41,.92);border:1px solid rgba(255,255,255,.12);border-radius:8px;padding:4px 16px;font-family:var(--mono);font-size:.85rem;color:var(--accent);z-index:10;pointer-events:none;display:flex;align-items:center;gap:2px;white-space:nowrap;animation:bubble-in .25s ease;}
-.term-keyhint kbd{display:inline-block;background:rgba(255,255,255,.08);border:1px solid rgba(255,255,255,.2);border-radius:4px;padding:1px 7px;font-family:var(--mono);font-size:.82rem;color:var(--txt);min-width:1.4em;text-align:center;line-height:1.6;}
-.term-keyhint .key-sep{color:var(--txt-faint);margin:0 2px;font-size:.75rem;}
+/* ── tree 目录树 ── */
+.tree{font-family:var(--mono);font-size:.92rem;line-height:1.8;color:var(--txt-dim);background:#080c18;border:1px solid var(--line);border-radius:12px;padding:1.4rem 1.7rem;max-width:1100px;white-space:pre;overflow-x:auto;}
+.tree .d{color:var(--accent);} .tree .hl{color:var(--emerald);} .tree .cm{color:var(--txt-faint);} .tree .pl{color:var(--violet);}
+.tree b{color:var(--txt);font-weight:600;}
+
+/* ── two-col 两栏 ── */
+.two-col{display:grid;grid-template-columns:1fr 1fr;gap:1.6rem;}
+
 </style>
 </head>
 <body>
@@ -297,7 +309,9 @@ pre.code .k{color:var(--violet);} pre.code .s{color:var(--emerald);} pre.code .c
      · 需要空格逐步推进的元素加 class="step"（默认隐藏，每按空格揭示一个）；
        复杂交互见 references/COMPONENTS.md「交互与分步」：data-steps / coslides:step 事件。
      ════════════════════════════════════════════════════════════════════ -->
+
 <div id="deck">
+
 
   <!-- ══════════ 封面 ══════════ -->
   <section class="slide title-slide active">
@@ -829,11 +843,14 @@ pre.code .k{color:var(--violet);} pre.code .s{color:var(--emerald);} pre.code .c
   </section>
 
 </div>
+
+
+</div>
 <!-- ↑↑↑ 只编辑上面的 #deck 区域 ↑↑↑ -->
 <div class="nav-hint">点击 / <kbd>空格</kbd> 推进 · <kbd>→</kbd> 下一页 · <kbd>←</kbd> 上一页 · <kbd>1-9</kbd> 跳章 · <kbd>Esc</kbd> 概览 · <kbd>C</kbd> 批注 · <kbd>J</kbd> 查看标注 · <kbd>F</kbd> 全屏</div>
 <div id="chrome">
   <!-- 改这里：品牌名 -->
-  <div id="brand"><span class="dot"></span> <span id="brandname">coslides · 能力全展示</span> <span id="chapname"></span></div>
+  <div id="brand"><span class="dot"></span> <span id="brandname">coslides</span> <span id="chapname"></span></div>
   <div id="dots"></div>
   <div id="counter"><b id="cur">1</b> / <span id="total">1</span></div>
 </div>
@@ -841,6 +858,7 @@ pre.code .k{color:var(--violet);} pre.code .s{color:var(--emerald);} pre.code .c
 <div id="comments-layer"></div>
 <div id="cm-banner">批注模式 · 点击页面任意处留言 · Enter / Esc 退出</div>
 <div id="cm-json"><div class="cm-jtitle">Comments JSON · 编辑或整段粘贴后点「应用」 · Esc 关闭</div><textarea id="cm-json-ta" spellcheck="false"></textarea><div class="cm-jbar"><span class="cm-jbtn" id="cm-json-apply">应用</span><span class="cm-jerr" id="cm-json-err"></span><span class="cm-jbtn cm-jclear" id="cm-json-clear">清除全部</span></div></div>
+
 
 <script>
 // ── core：slides 数组、章节索引、底部圆点、导航、键盘/触摸、hash ──
@@ -954,6 +972,35 @@ document.getElementById('deck').addEventListener('click', (e) => {
 let tx = 0;
 document.addEventListener('touchstart', e => { tx = e.touches[0].clientX; }, { passive: true });
 document.addEventListener('touchend', e => { const dx = e.changedTouches[0].clientX - tx; if (dx < -50) next(); else if (dx > 50) prev(); }, { passive: true });
+
+// ── mobile viewport scaling ──
+const MOBILE_DESIGN_W = 1200;
+const MOBILE_DESIGN_H = 675;  // 16:9
+
+function updateMobileScale() {
+  var deck = document.getElementById('deck');
+  var vw = window.innerWidth;
+  var vh = window.innerHeight;
+
+  if (vw >= 768 && vh >= 500) {
+    deck.style.transform = '';
+    deck.style.width = '';
+    deck.style.height = '';
+    deck.style.position = '';
+    deck.style.top = '';
+    deck.style.left = '';
+    return;
+  }
+
+  var scale = Math.min(vw / MOBILE_DESIGN_W, vh / MOBILE_DESIGN_H);
+  deck.style.width = MOBILE_DESIGN_W + 'px';
+  deck.style.height = MOBILE_DESIGN_H + 'px';
+  deck.style.position = 'fixed';
+  deck.style.top = '50%';
+  deck.style.left = '50%';
+  deck.style.transform = 'translate(-50%,-50%) scale(' + scale + ')';
+}
+window.addEventListener('resize', updateMobileScale);
 
 // ── overview 缩略概览 ──
 const slideTitles = slides.map(s => {
@@ -1241,7 +1288,7 @@ function advance() {
   document.addEventListener('visibilitychange', () => { running = !document.hidden; if (running) frame(); else cancelAnimationFrame(raf); });
 })();
 
-  applyHash();   // 启动：按 URL #p<N>，否则第 1 页
+  updateMobileScale(); applyHash();   // 启动：移动端缩放 + 按 URL #p<N>
 </script>
 </body>
 </html>
