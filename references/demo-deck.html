@@ -287,6 +287,11 @@ ul.feat li b{color:var(--txt);} ul.feat li span.dim{color:var(--txt-dim);}
 .term-quad>.term-pane:nth-child(3){border-top:1px solid rgba(255,255,255,.1);}
 .term-quad>.term-pane:nth-child(4){border-left:1px solid rgba(255,255,255,.1);border-top:1px solid rgba(255,255,255,.1);}
 
+/* ── mobile 竖屏：terminal 全宽 ── */
+@media (max-width:767px),(max-height:499px){
+  .term-frame{width:100%!important;max-width:100%!important;height:auto!important;min-height:280px;}
+}
+
 /* ── term 终端模拟 ── */
 .term{font-family:var(--mono);font-size:.92rem;line-height:1.75;background:#070b16;border:1px solid var(--line);border-radius:12px;padding:1.3rem 1.6rem;max-width:880px;width:100%;}
 .term .bar{display:flex;gap:.5rem;margin-bottom:.9rem;}
@@ -321,6 +326,7 @@ ul.feat li b{color:var(--txt);} ul.feat li span.dim{color:var(--txt-dim);}
      ════════════════════════════════════════════════════════════════════ -->
 
 <div id="deck">
+
 
 
 
@@ -853,6 +859,9 @@ ul.feat li b{color:var(--txt);} ul.feat li span.dim{color:var(--txt-dim);}
     <h1>内容你来写，<br><span class="accent">体验框架包办</span></h1>
     <div class="sub">单文件 · 零依赖 · 暗色风 · 全套导航 · 分步交互 · 章节主题色 · 沉浸式终端。<br>复制模板、填 #deck、双击打开。</div>
   </section>
+
+</div>
+
 
 </div>
 

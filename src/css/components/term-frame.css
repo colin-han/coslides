@@ -39,3 +39,8 @@
 .term-quad>.term-pane:nth-child(2){border-left:1px solid rgba(255,255,255,.1);}
 .term-quad>.term-pane:nth-child(3){border-top:1px solid rgba(255,255,255,.1);}
 .term-quad>.term-pane:nth-child(4){border-left:1px solid rgba(255,255,255,.1);border-top:1px solid rgba(255,255,255,.1);}
+
+/* ── mobile 竖屏：terminal 全宽 ── */
+@media (max-width:767px),(max-height:499px){
+  .term-frame{width:100%!important;max-width:100%!important;height:auto!important;min-height:280px;}
+}
