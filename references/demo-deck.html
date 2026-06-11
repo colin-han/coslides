@@ -324,6 +324,7 @@ ul.feat li b{color:var(--txt);} ul.feat li span.dim{color:var(--txt-dim);}
 
 
 
+
   <!-- ══════════ 封面 ══════════ -->
   <section class="slide title-slide active">
     <div class="kicker">coslides · 能力全展示</div>
@@ -860,6 +861,9 @@ ul.feat li b{color:var(--txt);} ul.feat li span.dim{color:var(--txt-dim);}
 
 
 </div>
+
+
+</div>
 <!-- ↑↑↑ 只编辑上面的 #deck 区域 ↑↑↑ -->
 <div class="nav-hint">点击 / <kbd>空格</kbd> 推进 · <kbd>→</kbd> 下一页 · <kbd>←</kbd> 上一页 · <kbd>1-9</kbd> 跳章 · <kbd>Esc</kbd> 概览 · <kbd>C</kbd> 批注 · <kbd>J</kbd> 查看标注 · <kbd>F</kbd> 全屏</div>
 <div id="chrome">
@@ -1030,9 +1034,9 @@ function updateMobileScale() {
   deck.style.width = MOBILE_DESIGN_W + 'px';
   deck.style.height = MOBILE_DESIGN_H + 'px';
   deck.style.position = 'fixed';
-  deck.style.top = ((vh - MOBILE_BAR_H - MOBILE_DESIGN_H * scale) / 2) + 'px';
-  deck.style.left = ((vw - MOBILE_DESIGN_W * scale) / 2) + 'px';
-  deck.style.transform = 'scale(' + scale + ')';
+  deck.style.top = ((vh - MOBILE_BAR_H) / 2) + 'px';
+  deck.style.left = '50%';
+  deck.style.transform = 'translate(-50%,-50%) scale(' + scale + ')';
 }
 window.addEventListener('resize', updateMobileScale);
 
