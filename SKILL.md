@@ -31,6 +31,7 @@ description: 用 coslides 框架快速生成演示文稿（单文件 HTML slides
 | `chips.css` | `.chips` `.chip` | 标签集合 |
 | `pipeline.css` | `.pipe` `.pnode` | 线性步骤 |
 | `flow.css` | `.flow-*` | 决策流程图 |
+| `d2.css` | `.d2` | D2 文本图（时序/类图/ER 等复杂图） |
 | `chat.css` | `.chat` `.bubble` | 问答/点击揭示 |
 | `two-col.css` | `.two-col` | 左右对照 |
 | `term-frame.css` | `.term-frame` `.term-pane` | 终端分栏布局 |
@@ -111,8 +112,11 @@ description: 用 coslides 框架快速生成演示文稿（单文件 HTML slides
    - 该章其余页带 `data-chapter="N"`（颜色/标题只写在第一页）。
    - 首页（封面）保留 `active` 类，其余页不要 `active`。
    - 需要逐项浮现的元素加 `class="reveal-item"`。
+6. 若用到 D2 图：写完 `<figure class="d2"><script type="text/d2">…</script></figure>` 占位后，
+   运行 `node render-d2.js <deck.html>` 渲染所有图为内联 SVG（需本机已装 d2）。
+   改图时直接编辑 `<script type="text/d2">` 内文本，重跑该命令即可再生。
 
-### 第 6 步 · 自检（产出前逐项核对）
+### 第 7 步 · 自检（产出前逐项核对）
 - [ ] 模板顶部原有的 `<style>` 与底部原有的 `<script>` 未被改动（`:root` 三个变量除外）；自定义样式/交互写在 section 内
 - [ ] 用到的组件样式已从 `src/css/components/` 加载并插入 `<style>` 块
 - [ ] 若用终端交互：JS snippet（term-builder / bubble / keyhint）已从 `src/js/snippets/` 读取并插入 section `<script>`
@@ -122,9 +126,11 @@ description: 用 coslides 框架快速生成演示文稿（单文件 HTML slides
 - [ ] 无外部依赖（CDN / 外链字体图片）
 - [ ] 组件片段结构正确（对照 `references/COMPONENTS.md`）
 - [ ] 若用分步：`.step` 或 `data-steps` 已就位，空格推进、推完翻页符合预期
+- [ ] 若用 D2 图：每个 `<figure class="d2">` 内已含 `<!--coslides-d2-start-->` 标记的 `<svg>`，无空占位
 
-### 第 7 步 · 交付
+### 第 8 步 · 交付
 告诉用户产物路径，并提示放映快捷键：`空格`/点击 推进（页内有步骤时逐步展开，否则翻页）、`←` `→` 翻页、`1-9` 跳章、`Esc` 概览、`F` 全屏、`#p7` 深链。
+若 deck 含 D2 图，交付前确认本机已装 d2（curl -fsSL https://d2lang.com/install.sh | sh -s --）。
 
 ## 内容与风格建议
 
@@ -145,6 +151,7 @@ description: 用 coslides 框架快速生成演示文稿（单文件 HTML slides
   | 终端交互演示 | `term-frame` + `TermBuilder` |
   | 画外音/提示 | Balloon（`bubble`） |
   | 按键提示 | KeyHint（`keyhint`） |
+  | 复杂流程/时序/类图/ER（超出手写 flow/pipeline） | D2 `.d2`（写文本，跑 render-d2.js） |
 - **章节节奏**：每章用 `chapter` 分隔页开场；章内 3-6 页为宜。
 - 强调用 `.accent`（主色）/ `.hl`（黄）/ `.ref`（引用路径）。
 
