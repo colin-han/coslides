@@ -1,0 +1,11 @@
+/* ── d2 图（构建期渲染的内联 SVG）── */
+/* 隐藏原始源文本：<script type="text/d2"> 浏览器本就不渲染，双重保险 */
+.d2{display:flex;justify-content:center;align-items:center;margin:1rem auto;width:100%;}
+.d2 script{display:none !important;}
+/* currentColor 解析为 .d2 的 color，跟随所在 [data-chapter] 章节色 */
+.d2{color:var(--accent);}
+.d2 svg{max-width:100%;max-height:76vh;height:auto;width:auto;display:block;}
+/* 文字沿用幻灯片字体（D2 内嵌字体已被后处理剥离） */
+.d2 svg text{font-family:inherit;}
+/* 若 D2 输出大背景矩形，让它透明以融入深色背景 */
+.d2 svg > rect:first-child{opacity:0;}
