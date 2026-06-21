@@ -72,9 +72,31 @@ function callD2(srcText) {
   }
 }
 
-module.exports = { ensureD2, callD2, postProcessSvg, injectSvg, D2_THEME };
+const FIGURE_RE = /<figure\s+class="d2">([\s\S]*?)<\/figure>/g;
+const SCRIPT_RE = /<script\s+type="text\/d2">([\s\S]*?)<\/script>/;
 
-if (require.main === module) {
-  // main 在 Task 5 实现
-  console.log('render-d2.js 尚未实现 main（见 Task 5）');
+// 对整段 HTML 渲染所有 .d2 figure；返回处理后的 HTML。
+function renderInHtml(html) {
+  return html.replace(FIGURE_RE, (full, inner) => {
+    const m = inner.match(SCRIPT_RE);
+    if (!m) return full;                       // 无源文本，跳过
+    const src = m[1].trim();
+    const svg = postProcessSvg(callD2(src));   // 渲染 + 后处理
+    return '<figure class="d2">' + injectSvg(inner, svg) + '</figure>';
+  });
 }
+
+function main(argv) {
+  const file = argv[0];
+  if (!file) { console.error('用法: node render-d2.js <deck.html>'); process.exit(1); }
+  ensureD2();
+  const html = fs.readFileSync(file, 'utf8');
+  const before = (html.match(/<figure\s+class="d2">/g) || []).length;
+  const out = renderInHtml(html);
+  fs.writeFileSync(file, out, 'utf8');
+  console.log(`✅ 处理 ${before} 个 d2 figure → ${file}`);
+}
+
+module.exports = { ensureD2, callD2, postProcessSvg, injectSvg, renderInHtml, main, D2_THEME };
+
+if (require.main === module) main(process.argv.slice(2));

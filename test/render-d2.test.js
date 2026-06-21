@@ -1,7 +1,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert');
 const { execFileSync } = require('child_process');
-const { callD2, postProcessSvg, injectSvg } = require('../render-d2.js');
+const { callD2, postProcessSvg, injectSvg, renderInHtml } = require('../render-d2.js');
 
 function d2Available() {
   try { execFileSync('d2', ['--version'], { stdio: 'pipe' }); return true; }
@@ -60,4 +60,29 @@ test('injectSvg 再次注入替换旧 svg（幂等）', () => {
   assert.ok(!out.includes('id="old"'), '旧 svg 被清除');
   assert.ok(out.includes('id="new"'), '新 svg 写入');
   assert.equal((out.match(/coslides-d2-start-->/g) || []).length, 1, '标记不重复');
+});
+
+test('renderInHtml 渲染所有 figure 并保留源文本（仅当 d2 可用时）',
+  { skip: !d2Available() && 'd2 未安装' }, () => {
+  const html = '<section><figure class="d2"><script type="text/d2">A -> B: hi</script></figure></section>';
+  const out = renderInHtml(html);
+  assert.ok(out.includes('<!--coslides-d2-start-->'), '注入了标记');
+  assert.ok(out.includes('<svg'), '注入了 svg');
+  assert.ok(out.includes('A -> B: hi'), '源文本保留');
+  assert.equal((out.match(/coslides-d2-start-->/g) || []).length, 1, '不重复标记块');
+});
+
+test('renderInHtml 跳过无源文本的 figure', () => {
+  const html = '<figure class="d2"><p>no script here</p></figure>';
+  const out = renderInHtml(html);
+  assert.ok(!out.includes('<!--coslides-d2-start-->'), '不注入');
+});
+
+test('renderInHtml 幂等：跑两次结果一致',
+  { skip: !d2Available() && 'd2 未安装' }, () => {
+  const html = '<figure class="d2"><script type="text/d2">A -> B</script></figure>';
+  const once = renderInHtml(html);
+  const twice = renderInHtml(once);
+  assert.equal(once, twice, '两次渲染结果完全一致');
+  assert.equal((twice.match(/coslides-d2-start-->/g) || []).length, 1, '标记不重复');
 });
