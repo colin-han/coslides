@@ -1,7 +1,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert');
 const { execFileSync } = require('child_process');
-const { callD2 } = require('../render-d2.js');
+const { callD2, postProcessSvg } = require('../render-d2.js');
 
 function d2Available() {
   try { execFileSync('d2', ['--version'], { stdio: 'pipe' }); return true; }
@@ -14,4 +14,32 @@ test('callD2 返回合法 SVG（仅当 d2 可用时）', { skip: !d2Available() 
   // d2 输出以 <?xml?> prolog 开头（探测确认），故用 includes 而非 startsWith
   assert.ok(svg.includes('<svg'), '应含 <svg');
   assert.ok(svg.includes('</svg>'), '应含 </svg>');
+});
+
+test('postProcessSvg 把最高频 stroke 色替换为 currentColor', () => {
+  const svg = '<svg><path stroke="#0a0a0a" d="M1"/>' +
+    '<path stroke="#0a0a0a" d="M2"/>' +
+    '<path stroke="#abcdef" d="M3"/></svg>';
+  const out = postProcessSvg(svg);
+  assert.equal((out.match(/stroke="currentColor"/g) || []).length, 2, '两处主色被替换');
+  assert.ok(out.includes('stroke="#abcdef"'), '低频色保留');
+});
+
+test('postProcessSvg 剥离内嵌 base64 字体 style 块', () => {
+  const svg = '<svg><style>@font-face{font-family:x;src:url(data:font/woff2;base64,AAA)}</style><text>x</text></svg>';
+  const out = postProcessSvg(svg);
+  assert.ok(!out.includes('@font-face'), '字体声明被剥离');
+  assert.ok(out.includes('<text>'), '其余内容保留');
+});
+
+test('postProcessSvg 无 stroke 时不报错', () => {
+  const svg = '<svg><text>hi</text></svg>';
+  assert.doesNotThrow(() => postProcessSvg(svg));
+});
+
+test('postProcessSvg 剥离 <?xml?> prolog', () => {
+  const svg = '<?xml version="1.0" encoding="utf-8"?><svg><text>hi</text></svg>';
+  const out = postProcessSvg(svg);
+  assert.ok(!out.includes('<?xml'), 'prolog 被剥离');
+  assert.ok(out.startsWith('<svg'), '以 <svg 开头');
 });
