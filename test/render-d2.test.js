@@ -94,3 +94,12 @@ test('renderInHtml 幂等：跑两次结果一致',
   assert.equal(once, twice, '两次渲染结果完全一致');
   assert.equal((twice.match(/coslides-d2-start-->/g) || []).length, 1, '标记不重复');
 });
+
+test('renderInHtml 渲染同页多个 figure（仅当 d2 可用时）',
+  { skip: !d2Available() && 'd2 未安装' }, () => {
+  const html = '<figure class="d2"><script type="text/d2">A -> B</script></figure>' +
+    '<figure class="d2"><script type="text/d2">C -> D</script></figure>';
+  const out = renderInHtml(html);
+  assert.equal((out.match(/coslides-d2-start-->/g) || []).length, 2, '两个 figure 各一个标记块');
+  assert.ok(out.includes('A -> B') && out.includes('C -> D'), '两份源文本保留');
+});

@@ -25,28 +25,32 @@ function injectSvg(inner, svg) {
   return inner.replace(/\s*$/, '') + '\n  ' + block + '\n';
 }
 
-// 后处理：① 剥离 <?xml?> prolog（d2 输出带头，内联进 HTML 时多余）
-// ② 剥离内嵌 base64 字体（若有）③ 连接线主色 → currentColor，
-// 使图随所在 [data-chapter] 章节色变化（d2.css 设 .d2{color:var(--accent)}）。
+// 后处理：
+// · 剥离 <?xml?> prolog（d2 输出带头，内联进 HTML 多余）
+// · 剥离含 @font-face 的内嵌 <style>（D2 内嵌 base64 字体，体积大）
+// · 连接线与箭头主色 → currentColor，使图随 [data-chapter] 章节色变化
+//   （d2.css 设 .d2{color:var(--accent)}）
 function postProcessSvg(svg) {
   if (!svg) return '';
   let out = svg;
-  // ① 剥离 <?xml ...?> prolog（探测确认 d2 输出以它开头）
+  // 剥离 <?xml ...?> prolog（探测确认 d2 输出以它开头）
   out = out.replace(/^<\?xml[^]*?\?>/i, '').trimStart();
-  // ② 剥离含 @font-face 的内嵌 <style>（D2 内嵌 base64 字体，体积大）
-  out = out.replace(/<style[^>]*>[\s\S]*?@font-face[\s\S]*?<\/style>/g, '');
-  // ③ 统计 stroke 颜色频次，取最高频（连接线主色）替换为 currentColor
+  // 逐个匹配 <style> 块，仅删除含 @font-face 的（避免误删合法 CSS）
+  out = out.replace(/<style[^>]*>([\s\S]*?)<\/style>/g, (block, body) =>
+    body.includes('@font-face') ? '' : block
+  );
+  // 统计 stroke 颜色频次，取最高频（连接线主色）替换为 currentColor
   const strokes = {};
   for (const m of out.matchAll(/stroke="(#[0-9a-fA-F]{3,8})"/g)) {
     strokes[m[1]] = (strokes[m[1]] || 0) + 1;
   }
-  let dom = null, n = 0;
+  let dominantColor = null, maxCount = 0;
   for (const c of Object.keys(strokes)) {
-    if (strokes[c] > n) { n = strokes[c]; dom = c; }
+    if (strokes[c] > maxCount) { maxCount = strokes[c]; dominantColor = c; }
   }
-  if (dom) {
-    out = out.split('stroke="' + dom + '"').join('stroke="currentColor"');
-    out = out.split('fill="' + dom + '"').join('fill="currentColor"');
+  if (dominantColor) {
+    out = out.split('stroke="' + dominantColor + '"').join('stroke="currentColor"');
+    out = out.split('fill="' + dominantColor + '"').join('fill="currentColor"');
   }
   return out;
 }

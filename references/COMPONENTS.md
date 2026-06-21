@@ -197,7 +197,7 @@
 ```
 
 ### D2 图 `.d2`
-用 D2 文本描述图，构建期渲染成内联 SVG。适合时序图、类图、ER、状态机等超出手写 `flow`/`pipeline` 能力的复杂图。原始源文本以隐藏 `<script type="text/d2">` 保留，改完重跑 `node render-d2.js <deck>` 即可再生。
+用 D2 文本描述图，构建期渲染成内联 SVG。适合时序图、类图、ER、状态机等超出手写 `flow`/`pipeline` 能力的复杂图。原始源文本以隐藏 `<script type="text/d2">` 保留，改完重跑 `node render-d2.js <deck.html>` 即可再生。
 
 > 需本机已装 d2：`curl -fsSL https://d2lang.com/install.sh | sh -s --`
 > 样式需加载 `src/css/components/d2.css`。图主色自动跟随所在章节主题色。
