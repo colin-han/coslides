@@ -1,8 +1,8 @@
 #!/usr/bin/env node
 // coslides · D2 渲染/再生工具
 // 用法: node render-d2.js <deck.html>
-// 扫描 <figure class="d2"><script type="text/d2">…</script></figure>，
-// 调用系统 d2 渲染成 SVG，后处理后用幂等标记注入回 figure。
+// 扫描 <figure class="…d2…"><script type="text/d2">…</script></figure>（class 含 d2 即可），
+// 调用系统 d2 渲染成 SVG，后处理后用幂等标记注入回 figure，保留 figure 其他 class/属性。
 
 const fs = require('fs');
 const path = require('path');
@@ -77,17 +77,22 @@ function callD2(srcText) {
   }
 }
 
-const FIGURE_RE = /<figure\s+class="d2">([\s\S]*?)<\/figure>/g;
+// 匹配任意 <figure>：捕获起始标签的属性 (attrs) 与内部内容 (inner)。
+// 是否处理由 CLASS_D2_RE 判断（class 含 d2 即可，d2 不必是唯一类）。
+const FIGURE_RE = /<figure\b([^>]*)>([\s\S]*?)<\/figure>/g;
+const CLASS_D2_RE = /\bclass="[^"]*\bd2\b[^"]*"/;
 const SCRIPT_RE = /<script\s+type="text\/d2">([\s\S]*?)<\/script>/;
 
-// 对整段 HTML 渲染所有 .d2 figure；返回处理后的 HTML。
+// 对整段 HTML 渲染所有 class 含 d2 的 figure；返回处理后的 HTML。
+// 保留 figure 原有的全部 class 与属性（id/style 等），只替换 inner。
 function renderInHtml(html) {
-  return html.replace(FIGURE_RE, (full, inner) => {
+  return html.replace(FIGURE_RE, (full, attrs, inner) => {
+    if (!CLASS_D2_RE.test(attrs)) return full; // 非 d2 figure，原样
     const m = inner.match(SCRIPT_RE);
     if (!m) return full;                       // 无源文本，跳过
     const src = m[1].trim();
     const svg = postProcessSvg(callD2(src));   // 渲染 + 后处理
-    return '<figure class="d2">' + injectSvg(inner, svg) + '</figure>';
+    return '<figure' + attrs + '>' + injectSvg(inner, svg) + '</figure>';
   });
 }
 
@@ -96,7 +101,8 @@ function main(argv) {
   if (!file) { console.error('用法: node render-d2.js <deck.html>'); process.exit(1); }
   ensureD2();
   const html = fs.readFileSync(file, 'utf8');
-  const before = (html.match(/<figure\s+class="d2">/g) || []).length;
+  const before = (html.match(FIGURE_RE) || [])
+    .filter((_, i, arr) => CLASS_D2_RE.test(arr[i])).length;
   const out = renderInHtml(html);
   fs.writeFileSync(file, out, 'utf8');
   console.log(`✅ 处理 ${before} 个 d2 figure → ${file}`);

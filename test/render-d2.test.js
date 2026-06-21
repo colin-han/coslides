@@ -103,3 +103,32 @@ test('renderInHtml 渲染同页多个 figure（仅当 d2 可用时）',
   assert.equal((out.match(/coslides-d2-start-->/g) || []).length, 2, '两个 figure 各一个标记块');
   assert.ok(out.includes('A -> B') && out.includes('C -> D'), '两份源文本保留');
 });
+
+test('renderInHtml 匹配 class 含 d2 的 figure（d2 不是唯一类）',
+  { skip: !d2Available() && 'd2 未安装' }, () => {
+  const cases = [
+    '<figure class="d2 reveal-item"><script type="text/d2">A -> B</script></figure>',
+    '<figure class="reveal-item d2"><script type="text/d2">A -> B</script></figure>',
+    '<figure class="big d2 reveal-item"><script type="text/d2">A -> B</script></figure>',
+  ];
+  for (const html of cases) {
+    const out = renderInHtml(html);
+    assert.ok(out.includes('<!--coslides-d2-start-->'), `应渲染: ${html}`);
+  }
+});
+
+test('renderInHtml 保留 figure 原有的其他 class 与属性',
+  { skip: !d2Available() && 'd2 未安装' }, () => {
+  const html = '<figure class="d2 reveal-item" id="arch" style="max-width:80%"><script type="text/d2">A -> B</script></figure>';
+  const out = renderInHtml(html);
+  assert.ok(out.includes('<!--coslides-d2-start-->'), '确实渲染了（匹配多 class）');
+  assert.ok(out.includes('class="d2 reveal-item"'), '保留完整 class（含其他类）');
+  assert.ok(out.includes('id="arch"'), '保留 id');
+  assert.ok(out.includes('style="max-width:80%"'), '保留 style');
+});
+
+test('renderInHtml 不误匹配 class 不含 d2 的 figure', () => {
+  const html = '<figure class="photo"><script type="text/d2">A -> B</script></figure>';
+  const out = renderInHtml(html);
+  assert.ok(!out.includes('<!--coslides-d2-start-->'), '非 d2 figure 不应被渲染');
+});
