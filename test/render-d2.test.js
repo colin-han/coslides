@@ -1,7 +1,7 @@
 const { test } = require('node:test');
 const assert = require('node:assert');
 const { execFileSync } = require('child_process');
-const { callD2, postProcessSvg } = require('../render-d2.js');
+const { callD2, postProcessSvg, injectSvg } = require('../render-d2.js');
 
 function d2Available() {
   try { execFileSync('d2', ['--version'], { stdio: 'pipe' }); return true; }
@@ -42,4 +42,22 @@ test('postProcessSvg 剥离 <?xml?> prolog', () => {
   const out = postProcessSvg(svg);
   assert.ok(!out.includes('<?xml'), 'prolog 被剥离');
   assert.ok(out.startsWith('<svg'), '以 <svg 开头');
+});
+
+test('injectSvg 首次注入追加标记块', () => {
+  const inner = '<script type="text/d2">A -> B</script>\n';
+  const out = injectSvg(inner, '<svg/>');
+  assert.ok(out.includes('<!--coslides-d2-start-->'), '含开始标记');
+  assert.ok(out.includes('<!--coslides-d2-end-->'), '含结束标记');
+  assert.ok(out.includes('<svg/>'), '含 svg');
+  assert.ok(out.includes('A -> B'), '保留源文本');
+});
+
+test('injectSvg 再次注入替换旧 svg（幂等）', () => {
+  const inner = '<script type="text/d2">A -> B</script>\n' +
+    '<!--coslides-d2-start--><svg id="old"/><!--coslides-d2-end-->';
+  const out = injectSvg(inner, '<svg id="new"/>');
+  assert.ok(!out.includes('id="old"'), '旧 svg 被清除');
+  assert.ok(out.includes('id="new"'), '新 svg 写入');
+  assert.equal((out.match(/coslides-d2-start-->/g) || []).length, 1, '标记不重复');
 });

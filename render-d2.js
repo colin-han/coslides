@@ -12,8 +12,18 @@ const { execFileSync } = require('child_process');
 // 深色主题编号（Task 1 探测确定；默认 200）
 const D2_THEME = '200';
 
-// 占位导出（后续任务实现）
-function injectSvg(inner, svg) { return inner; }
+// 幂等标记常量（Task 4）
+const MARK_START = '<!--coslides-d2-start-->';
+const MARK_END = '<!--coslides-d2-end-->';
+const MARK_RE = /<!--coslides-d2-start-->[\s\S]*?<!--coslides-d2-end-->/;
+
+// 把渲染好的 svg 放进幂等标记块。已有标记→替换；否则末尾追加。
+// 源 <script type="text/d2"> 始终保留，实现「改源文本→重渲染」回溯闭环。
+function injectSvg(inner, svg) {
+  const block = MARK_START + svg + MARK_END;
+  if (MARK_RE.test(inner)) return inner.replace(MARK_RE, block);
+  return inner.replace(/\s*$/, '') + '\n  ' + block + '\n';
+}
 
 // 后处理：① 剥离 <?xml?> prolog（d2 输出带头，内联进 HTML 时多余）
 // ② 剥离内嵌 base64 字体（若有）③ 连接线主色 → currentColor，
