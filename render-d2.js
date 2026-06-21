@@ -46,6 +46,7 @@ function postProcessSvg(svg) {
   }
   if (dom) {
     out = out.split('stroke="' + dom + '"').join('stroke="currentColor"');
+    out = out.split('fill="' + dom + '"').join('fill="currentColor"');
   }
   return out;
 }

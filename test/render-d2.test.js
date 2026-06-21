@@ -32,6 +32,14 @@ test('postProcessSvg 剥离内嵌 base64 字体 style 块', () => {
   assert.ok(out.includes('<text>'), '其余内容保留');
 });
 
+test('postProcessSvg 把主色 fill（箭头）也替换为 currentColor', () => {
+  const svg = '<svg><path stroke="#CBA6f7"/><polygon fill="#CBA6f7"/><text fill="#CDD6F4">x</text></svg>';
+  const out = postProcessSvg(svg);
+  assert.ok(out.includes('stroke="currentColor"'), 'stroke 替换');
+  assert.ok(out.includes('fill="currentColor"'), '箭头 fill 替换');
+  assert.ok(out.includes('fill="#CDD6F4"'), '文字 fill 保留');
+});
+
 test('postProcessSvg 无 stroke 时不报错', () => {
   const svg = '<svg><text>hi</text></svg>';
   assert.doesNotThrow(() => postProcessSvg(svg));
