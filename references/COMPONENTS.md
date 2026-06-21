@@ -197,7 +197,7 @@
 ```
 
 ### D2 图 `.d2`
-用 D2 文本描述图，构建期渲染成内联 SVG。适合时序图、类图、ER、状态机等超出手写 `flow`/`pipeline` 能力的复杂图。原始源文本以隐藏 `<script type="text/d2">` 保留，改完重跑 `node render-d2.js <deck.html>` 即可再生。
+**表达实体/系统之间「关系」时的首选**：架构图、调用链、时序/交互流程、数据模型（ER/类图）、状态转换、依赖关系、组织结构。用 D2 文本描述，构建期渲染成内联 SVG，主色自动跟随章节主题色。几行文本就能画出专业关系图——只要不是纯线性步骤（用 `pipeline`）或单一决策分叉（用 `flow`），就优先用 D2。原始源文本以隐藏 `<script type="text/d2">` 保留，改完重跑 `node render-d2.js <deck.html>` 即可再生。
 
 > 需本机已装 d2：`curl -fsSL https://d2lang.com/install.sh | sh -s --`
 > 样式需加载 `src/css/components/d2.css`。图主色自动跟随所在章节主题色。

@@ -31,7 +31,7 @@ description: 用 coslides 框架快速生成演示文稿（单文件 HTML slides
 | `chips.css` | `.chips` `.chip` | 标签集合 |
 | `pipeline.css` | `.pipe` `.pnode` | 线性步骤 |
 | `flow.css` | `.flow-*` | 决策流程图 |
-| `d2.css` | `.d2` | D2 文本图（时序/类图/ER 等复杂图） |
+| `d2.css` | `.d2` | D2 关系图（架构/时序/类图/ER 等，文本→SVG） |
 | `chat.css` | `.chat` `.bubble` | 问答/点击揭示 |
 | `two-col.css` | `.two-col` | 左右对照 |
 | `term-frame.css` | `.term-frame` `.term-pane` | 终端分栏布局 |
@@ -65,6 +65,10 @@ description: 用 coslides 框架快速生成演示文稿（单文件 HTML slides
 
 - `#38e0d0` 青色 · `#a78bfa` 紫色 · `#4ade80` 绿色 · `#fbbf24` 琥珀 · `#fb7185` 玫瑰 · `#60a5fa` 蓝色
 
+**主动用 D2 画「关系型」内容**：当某页要表达的是实体/系统之间的**关系**——架构图、调用链、时序/交互流程、数据模型（ER/类图）、状态转换、依赖关系、组织结构、多分支决策——**优先在大纲里安排一页 D2 图**（`.d2`），而不是用 `flow`/`pipeline` 手凑。D2 用几行文本就能画出专业关系图，且自动跟随章节主题色。大纲里标成「— D2 架构图」「— D2 时序图」等，并在跟用户确认大纲时主动说一句「这页我建议用 D2 画一张 X 图」。
+> 边界：`pipeline` 适合**纯线性**步骤（A→B→C）；`flow` 适合**单一决策**的分叉。一旦出现多个实体、多对多关系、回路或时序，就用 D2。
+> D2 需本机已装 `d2`（见第 8 步）。不确定环境也没关系——先在大纲里规划 D2 页，渲染在输出阶段（第 5 步）处理。
+
 ```
 封面
 议程
@@ -74,6 +78,7 @@ description: 用 coslides 框架快速生成演示文稿（单文件 HTML slides
 第 2 章「方案」🟣 #a78bfa
   · 2.1 整体流程 — 流程条
   · 2.2 关键决策 — 决策图
+  · 2.3 系统架构 — D2 架构图（客户端→网关→服务，跟随本章紫色）
 收尾
 ```
 
@@ -142,6 +147,7 @@ description: 用 coslides 框架快速生成演示文稿（单文件 HTML slides
   | 逐条陈述 | `feat` |
   | 线性步骤 | `pipeline` |
   | 含分支的决策 | `flow` |
+  | **任何关系图**：架构/调用链/时序/ER/类图/状态机/依赖 | **D2 `.d2`**（文本→SVG，跟随章节色；写文本后跑 `render-d2.js`） |
   | 命令行 / 输出 | `term` |
   | 目录 / 文件结构 | `tree` |
   | 代码 | `pre.code` |
@@ -151,7 +157,6 @@ description: 用 coslides 框架快速生成演示文稿（单文件 HTML slides
   | 终端交互演示 | `term-frame` + `TermBuilder` |
   | 画外音/提示 | Balloon（`bubble`） |
   | 按键提示 | KeyHint（`keyhint`） |
-  | 复杂流程/时序/类图/ER（超出手写 flow/pipeline） | D2 `.d2`（写文本，跑 render-d2.js） |
 - **章节节奏**：每章用 `chapter` 分隔页开场；章内 3-6 页为宜。
 - 强调用 `.accent`（主色）/ `.hl`（黄）/ `.ref`（引用路径）。
 
